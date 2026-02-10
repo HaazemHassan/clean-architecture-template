@@ -1,0 +1,58 @@
+﻿using FluentValidation;
+using Template.Core.Bases.Authentication;
+using Template.Core.Extensions.Validations;
+using Template.Core.Features.Users.Commands.RequestModels;
+using Template.Core.ValidationsRules.Common;
+
+namespace Template.Core.Features.Users.Commands.Validators {
+    public class RegisterValidator : AbstractValidator<RegisterCommand> {
+        public RegisterValidator(PasswordSettings passwordSettings) {
+            ApplyValidationRules(passwordSettings);
+        }
+
+        private void ApplyValidationRules(PasswordSettings passwordSettings) {
+            RuleFor(x => x.FirstName).Required();
+            RuleFor(x => x.LastName).Required();
+            RuleFor(x => x.Email).Required();
+            RuleFor(x => x.Password).Required();
+            RuleFor(x => x.ConfirmPassword).Required();
+
+
+
+
+            When(x => !string.IsNullOrWhiteSpace(x.FirstName), () => {
+                RuleFor(x => x.FirstName).ApplyNameRules();
+            });
+
+            When(x => !string.IsNullOrWhiteSpace(x.LastName), () => {
+                RuleFor(x => x.LastName).ApplyNameRules();
+            });
+
+
+            When(x => !string.IsNullOrWhiteSpace(x.Email), () => {
+                RuleFor(x => x.Email).ApplyEmailRules();
+            });
+
+
+            When(x => !string.IsNullOrWhiteSpace(x.Password), () => {
+                RuleFor(x => x.Password).ApplyPasswordRules(passwordSettings);
+            });
+
+
+            When(x =>
+                !string.IsNullOrWhiteSpace(x.Password) &&
+                !string.IsNullOrWhiteSpace(x.ConfirmPassword),
+                () => {
+                    RuleFor(x => x.ConfirmPassword).ApplyConfirmPasswordRules(x => x.Password);
+                });
+
+            When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber), () => {
+                RuleFor(x => x.PhoneNumber).ApplyPhoneNumberRules();
+            });
+
+            When(x => !string.IsNullOrWhiteSpace(x.Address), () => {
+                RuleFor(x => x.Address).ApplyAddressRules();
+            });
+        }
+    }
+}

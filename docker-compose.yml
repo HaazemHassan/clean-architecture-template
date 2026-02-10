@@ -1,0 +1,82 @@
+name: proejctname-api-production
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-CU12-ubuntu-22.04
+    container_name: proejctname-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${DB_PASSWORD}
+      - MSSQL_PID=Express
+      - MSSQL_TCP_PORT=1433
+    ports:
+      - "${DB_EXTERNAL_PORT:-15000}:1433"
+    volumes:
+      - proejctname_sqlserver_data:/var/opt/mssql
+    networks:
+      - proejctname-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${DB_PASSWORD} -Q 'SELECT 1' || exit 1",
+        ]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+      timeout: 5s
+    restart: unless-stopped
+
+  proejctname-api:
+    image: hazemhassan1/proejctname-api:latest
+    container_name: proejctname-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=${DB_SERVER:-sqlserver},${DB_PORT:-1433};Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};TrustServerCertificate=True;
+      - jwtSettings__Secret=${JWT_SECRET}
+      - jwtSettings__Issuer=${JWT_ISSUER}
+      - jwtSettings__Audience=${JWT_AUDIENCE}
+      - jwtSettings__ValidateAudience=${JWT_VALIDATE_AUDIENCE:-false}
+      - jwtSettings__ValidateIssuer=${JWT_VALIDATE_ISSUER:-true}
+      - jwtSettings__ValidateLifetime=${JWT_VALIDATE_LIFETIME:-true}
+      - jwtSettings__ValidateIssuerSigningKey=${JWT_VALIDATE_ISSUER_SIGNING_KEY:-true}
+      - jwtSettings__AccessTokenExpirationMinutes=${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:-43200}
+      - jwtSettings__RefreshTokenExpirationDays=${JWT_REFRESH_TOKEN_EXPIRATION_DAYS:-30}
+      - PasswordSettings__MinLength=${PASSWORD_MIN_LENGTH:-3}
+      - PasswordSettings__MaxLength=${PASSWORD_MAX_LENGTH:-20}
+      - PasswordSettings__RequireUppercase=${PASSWORD_REQUIRE_UPPERCASE:-false}
+      - PasswordSettings__RequireLowercase=${PASSWORD_REQUIRE_LOWERCASE:-false}
+      - PasswordSettings__RequireDigit=${PASSWORD_REQUIRE_DIGIT:-false}
+      - PasswordSettings__RequireNonAlphanumeric=${PASSWORD_REQUIRE_NON_ALPHANUMERIC:-false}
+      - PasswordSettings__RequiredUniqueChars=${PASSWORD_REQUIRED_UNIQUE_CHARS:-1}
+      - RateLimitingSettings__DefaultLimiter__WindowMinutes=${RATE_LIMIT_DEFAULT_WINDOW_MINUTES:-1}
+      - RateLimitingSettings__DefaultLimiter__PermitLimit=${RATE_LIMIT_DEFAULT_PERMIT_LIMIT:-90}
+      - RateLimitingSettings__DefaultLimiter__QueueLimit=${RATE_LIMIT_DEFAULT_QUEUE_LIMIT:-10}
+      - RateLimitingSettings__DefaultLimiter__SegmentsPerWindow=${RATE_LIMIT_DEFAULT_SEGMENTS:-4}
+      - RateLimitingSettings__LoginLimiter__WindowMinutes=${RATE_LIMIT_LOGIN_WINDOW_MINUTES:-1}
+      - RateLimitingSettings__LoginLimiter__PermitLimit=${RATE_LIMIT_LOGIN_PERMIT_LIMIT:-5}
+      - RateLimitingSettings__LoginLimiter__QueueLimit=${RATE_LIMIT_LOGIN_QUEUE_LIMIT:-0}
+      - RateLimitingSettings__LoginLimiter__SegmentsPerWindow=${RATE_LIMIT_LOGIN_SEGMENTS:-4}
+      - RateLimitingSettings__RetryAfterSeconds=${RATE_LIMIT_RETRY_AFTER_SECONDS:-60}
+    ports:
+      - "${API_EXTERNAL_PORT:-44000}:8080"
+
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - proejctname-network
+    restart: unless-stopped
+
+networks:
+  proejctname-network:
+    driver: bridge
+
+volumes:
+  proejctname_sqlserver_data:
+    name: proejctname_sqlserver_data
+    driver: local

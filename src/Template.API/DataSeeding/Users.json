@@ -1,0 +1,29 @@
+[
+  {
+    "FirstName": "Super",
+    "LastName": "Admin",
+    "Email": "superadmin@project.com",
+    "PhoneNumber": "+201234567890",
+    "Address": "Cairo, Egypt",
+    "Password": "123",
+    "Role": "SuperAdmin"
+  },
+  {
+    "FirstName": "Admin",
+    "LastName": "User",
+    "Email": "admin@project.com",
+    "PhoneNumber": "+201234567891",
+    "Address": "Alexandria, Egypt",
+    "Password": "123",
+    "Role": "Admin"
+  },
+  {
+    "FirstName": "Test",
+    "LastName": "User",
+    "Email": "user@project.com",
+    "PhoneNumber": "+201234567892",
+    "Address": "Giza, Egypt",
+    "Password": "123",
+    "Role": "User"
+  }
+]
