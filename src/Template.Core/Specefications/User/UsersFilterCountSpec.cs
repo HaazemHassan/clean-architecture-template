@@ -1,7 +1,7 @@
 using Ardalis.Specification;
 using Template.Core.Entities.UserEntities;
 
-namespace Template.Core.Features.Users.Queries.Specefications {
+namespace Template.Core.Specefications.User {
     public class UsersFilterCountSpec : Specification<DomainUser> {
         public UsersFilterCountSpec(string? search) {
             if (!string.IsNullOrEmpty(search)) {

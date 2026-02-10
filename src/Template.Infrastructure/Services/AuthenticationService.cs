@@ -16,6 +16,7 @@ using Template.Core.Entities.IdentityEntities;
 using Template.Core.Enums;
 using Template.Core.Features.Users.Queries.Responses;
 using Template.Infrastructure.Data;
+using Template.Infrastructure.Specefications.RefreshTokens;
 
 namespace Template.Infrastructure.Services {
     public class AuthenticationService : IAuthenticationService {
@@ -45,7 +46,7 @@ namespace Template.Infrastructure.Services {
         }
 
         public async Task<ServiceOperationResult<AuthResult>> SignInWithPassword(string email, string passwod, CancellationToken ct = default) {
-            var userFromDb = await _userManager.Users
+            var userFromDb = await _userManager.Users.Include(au => au.DomainUser)
                                 .FirstOrDefaultAsync(u => u.Email == email, cancellationToken: ct);
             if (userFromDb is null)
                 return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "Invalid Email or password");
@@ -73,13 +74,13 @@ namespace Template.Infrastructure.Services {
             if (domainUserId is null)
                 return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "User id is null");
 
-            var appUser = await _userManager.Users.FirstOrDefaultAsync(au => au.DomainUserId.ToString() == domainUserId, cancellationToken: ct);
+            var appUser = await _userManager.Users.Include(au => au.DomainUser).FirstOrDefaultAsync(au => au.DomainUserId.ToString() == domainUserId, cancellationToken: ct);
             if (appUser is null)
                 return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "User not found");
 
-            var currentRefreshToken = await _unitOfWork.RefreshTokens.GetAsync(x => x.AccessTokenJTI == jwt.Id &&
-                                                                     x.Token == refreshToken &&
-                                                                     x.UserId == appUser.Id, ct);
+            var currentRefreshTokenSpec = new ActiveRefreshTokenByJtiAndTokenSpec(jwt.Id, refreshToken, appUser.Id);
+            var currentRefreshToken = await _unitOfWork.RefreshTokens.FirstOrDefaultAsync(currentRefreshTokenSpec, ct);
+
 
             if (currentRefreshToken is null || !currentRefreshToken.IsActive)
                 return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "Refresh token is not valid");
@@ -87,7 +88,7 @@ namespace Template.Infrastructure.Services {
             //new jwt result
             var jwtResultOperation = await AuthenticateAsync(appUser, currentRefreshToken!.Expires);
             if (!jwtResultOperation.Succeeded)
-                return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Failed, "Some thins went wrong");
+                return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Failed, jwtResultOperation.Message);
 
             currentRefreshToken.Revoke();
             await _unitOfWork.RefreshTokens.UpdateAsync(currentRefreshToken, ct);

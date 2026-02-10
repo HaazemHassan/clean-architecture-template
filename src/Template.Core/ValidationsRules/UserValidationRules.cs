@@ -26,9 +26,6 @@ namespace Template.Core.Extensions.Validations {
             this IRuleBuilder<T, string> ruleBuilder
         ) {
             var rule = ruleBuilder;
-
-
-
             return rule
                 .MaximumLength(100)
                     .WithMessage("{PropertyName} cannot exceed 100 characters")
@@ -75,8 +72,6 @@ namespace Template.Core.Extensions.Validations {
             this IRuleBuilder<T, string?> ruleBuilder
         ) {
             var rule = ruleBuilder;
-
-
 
             return rule.Must(phone => string.IsNullOrWhiteSpace(phone) || Regex.IsMatch(phone, @"^(\+20|0)(10|11|12|15)[0-9]{8}$"))
                     .WithMessage("Phone number is not valid");

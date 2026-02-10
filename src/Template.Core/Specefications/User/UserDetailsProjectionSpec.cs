@@ -2,7 +2,7 @@
 using Template.Core.Entities.UserEntities;
 using Template.Core.Features.Users.Queries.Responses;
 
-namespace Template.Core.Features.Users.Queries.Specefications {
+namespace Template.Core.Specefications.User {
     public class UserDetailsProjectionSpec : Specification<DomainUser, GetUserByIdResponse> {
         public UserDetailsProjectionSpec(int userId) {
             Query.Where(u => u.Id == userId);

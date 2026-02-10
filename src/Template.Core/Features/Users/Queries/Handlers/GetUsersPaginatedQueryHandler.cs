@@ -4,7 +4,7 @@ using Template.Core.Bases.Pagination;
 using Template.Core.Bases.Responses;
 using Template.Core.Features.Users.Queries.Models;
 using Template.Core.Features.Users.Queries.Responses;
-using Template.Core.Features.Users.Queries.Specefications;
+using Template.Core.Specefications.User;
 
 namespace Template.Core.Features.Users.Queries.Handlers {
     public class GetUsersPaginatedQueryHandler : ResponseHandler, IRequestHandler<GetUsersPaginatedQuery, PaginatedResult<GetUsersPaginatedResponse>> {
