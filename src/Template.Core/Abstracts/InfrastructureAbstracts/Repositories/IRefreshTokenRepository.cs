@@ -2,6 +2,6 @@
 
 namespace Template.Core.Abstracts.InfrastructureAbstracts.Repositories {
     public interface IRefreshTokenRepository : IGenericRepository<RefreshToken> {
-
+        Task DeleteExpiredTokensAsync(DateTime cutoffDate);
     }
 }

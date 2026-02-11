@@ -13,5 +13,12 @@ namespace Template.Infrastructure.Repositories {
             _refreshTokens = context.Set<RefreshToken>();
         }
 
+        public async Task DeleteExpiredTokensAsync(DateTime cutoffDate) {
+
+            await _refreshTokens
+                .Where(x => (x.RevokationDate != null && x.RevokationDate <= cutoffDate) ||
+                            (x.Expires <= cutoffDate))
+                .ExecuteDeleteAsync();
+        }
     }
 }

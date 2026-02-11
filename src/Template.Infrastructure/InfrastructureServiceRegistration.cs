@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +8,7 @@ using Template.Core.Abstracts.InfrastructureAbstracts.Services;
 using Template.Core.Bases.Authentication;
 using Template.Core.Entities.IdentityEntities;
 using Template.Infrastructure.Data;
+using Template.Infrastructure.Jobs;
 using Template.Infrastructure.Repositories;
 using Template.Infrastructure.Services;
 
@@ -18,8 +20,10 @@ public static class InfrastructureServiceRegistration {
 
         AddDbContextConfiguations(services, configuration);
         AddIdentityConfigurations(services, configuration);
+        AddHangfireConfiguration(services, configuration);
         AddRepositories(services);
         AddServices(services);
+        AddBackgroundJobs(services);
 
         return services;
     }
@@ -65,6 +69,23 @@ public static class InfrastructureServiceRegistration {
         return services;
     }
 
+    private static IServiceCollection AddHangfireConfiguration(IServiceCollection services, IConfiguration configuration) {
+
+        var hangfireSettings = new HangfireSettings();
+        configuration.GetSection(HangfireSettings.SectionName).Bind(hangfireSettings);
+        services.AddSingleton(hangfireSettings);
+
+        services.AddHangfire(config => config
+         .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+         .UseSimpleAssemblyNameTypeSerializer()
+         .UseRecommendedSerializerSettings()
+         .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
+
+        services.AddHangfireServer();
+
+        return services;
+    }
+
 
     private static IServiceCollection AddRepositories(IServiceCollection services) {
 
@@ -83,6 +104,12 @@ public static class InfrastructureServiceRegistration {
     private static IServiceCollection AddServices(IServiceCollection services) {
         services.AddTransient<IApplicationUserService, ApplicationUserService>();
         services.AddTransient<IAuthenticationService, AuthenticationService>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddBackgroundJobs(IServiceCollection services) {
+        services.AddScoped<RefreshTokensCleanupJob>();
 
         return services;
     }

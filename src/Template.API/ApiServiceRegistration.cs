@@ -27,9 +27,12 @@ namespace Template.API {
             AddApi(services, configuration);
             services.AddCore();
 
+
             return services;
 
+
         }
+
 
         private static IServiceCollection AddApi(IServiceCollection services, IConfiguration configuration) {
 

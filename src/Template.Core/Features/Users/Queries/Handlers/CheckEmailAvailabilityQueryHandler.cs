@@ -17,6 +17,7 @@ namespace Template.Core.Features.Users.Queries.Handlers {
             var response = new CheckEmailAvailabilityResponse {
                 IsAvailable = user is null
             };
+
             return Success(response, message: response.IsAvailable ? "Email is available." : "Email is not available.");
         }
     }
