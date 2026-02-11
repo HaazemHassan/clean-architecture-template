@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Net;
@@ -40,6 +41,7 @@ namespace Template.API {
             AddSwaggerConfigurations(services);
             AddAutorizationConfigurations(services);
             AddRateLimitingConfigurations(services, configuration);
+            AddHangfireConfiguration(services, configuration);
 
 
             #region Api Services
@@ -229,6 +231,23 @@ namespace Template.API {
                 var hash = SHA256.HashData(bytes);
                 return Convert.ToBase64String(hash);
             }
+        }
+
+        private static IServiceCollection AddHangfireConfiguration(IServiceCollection services, IConfiguration configuration) {
+
+            var hangfireSettings = new HangfireSettings();
+            configuration.GetSection(HangfireSettings.SectionName).Bind(hangfireSettings);
+            services.AddSingleton(hangfireSettings);
+
+            services.AddHangfire(config => config
+             .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+             .UseSimpleAssemblyNameTypeSerializer()
+             .UseRecommendedSerializerSettings()
+             .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
+
+            services.AddHangfireServer();
+
+            return services;
         }
 
     }

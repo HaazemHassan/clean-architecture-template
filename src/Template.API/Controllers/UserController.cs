@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Template.API.Bases;
 using Template.API.Filters;
 using Template.Core.Bases.Authentication;
 using Template.Core.Bases.Pagination;

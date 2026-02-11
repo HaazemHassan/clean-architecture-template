@@ -1,5 +1,4 @@
-﻿using Hangfire;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +19,6 @@ public static class InfrastructureServiceRegistration {
 
         AddDbContextConfiguations(services, configuration);
         AddIdentityConfigurations(services, configuration);
-        AddHangfireConfiguration(services, configuration);
         AddRepositories(services);
         AddServices(services);
         AddBackgroundJobs(services);
@@ -69,22 +67,7 @@ public static class InfrastructureServiceRegistration {
         return services;
     }
 
-    private static IServiceCollection AddHangfireConfiguration(IServiceCollection services, IConfiguration configuration) {
 
-        var hangfireSettings = new HangfireSettings();
-        configuration.GetSection(HangfireSettings.SectionName).Bind(hangfireSettings);
-        services.AddSingleton(hangfireSettings);
-
-        services.AddHangfire(config => config
-         .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-         .UseSimpleAssemblyNameTypeSerializer()
-         .UseRecommendedSerializerSettings()
-         .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
-
-        services.AddHangfireServer();
-
-        return services;
-    }
 
 
     private static IServiceCollection AddRepositories(IServiceCollection services) {

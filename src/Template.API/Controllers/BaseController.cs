@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using System.Net;
 using Template.Core.Bases.Responses;
 
-namespace Template.API.Bases {
+namespace Template.API.Controllers {
     [Route("api/[controller]")]
     [ApiController]
     [EnableRateLimiting("defaultLimiter")]
