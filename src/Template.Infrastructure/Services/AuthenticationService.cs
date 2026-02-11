@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -29,11 +30,12 @@ namespace Template.Infrastructure.Services {
         private readonly IMapper _mapper;
         private readonly ICurrentUserService _currentUserService;
         private readonly AppDbContext _dbContext;
+        private readonly ILogger<AuthenticationService> _logger;
         //private readonly IEmailService _emailService;
 
 
 
-        public AuthenticationService(JwtSettings jwtSettings, UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork, IApplicationUserService applicationUserService, IMapper mapper /*IEmailService emailService*/, RoleManager<ApplicationRole> roleManager, ICurrentUserService currentUserService, AppDbContext dbContext) {
+        public AuthenticationService(JwtSettings jwtSettings, UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork, IApplicationUserService applicationUserService, IMapper mapper /*IEmailService emailService*/, RoleManager<ApplicationRole> roleManager, ICurrentUserService currentUserService, AppDbContext dbContext, ILogger<AuthenticationService> logger) {
             _jwtSettings = jwtSettings;
             _userManager = userManager;
             _unitOfWork = unitOfWork;
@@ -42,48 +44,67 @@ namespace Template.Infrastructure.Services {
             _roleManager = roleManager;
             _currentUserService = currentUserService;
             _dbContext = dbContext;
+            _logger = logger;
             //_emailService = emailService;
         }
 
         public async Task<ServiceOperationResult<AuthResult>> SignInWithPassword(string email, string passwod, CancellationToken ct = default) {
             var userFromDb = await _userManager.Users.Include(au => au.DomainUser)
                                 .FirstOrDefaultAsync(u => u.Email == email, cancellationToken: ct);
-            if (userFromDb is null)
+            if (userFromDb is null) {
+                _logger.LogWarning("Failed login attempt for email: {Email} - User not found", email);
                 return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "Invalid Email or password");
+            }
 
             bool isAuthenticated = await _userManager.CheckPasswordAsync(userFromDb, passwod);
-            if (!isAuthenticated)
+            if (!isAuthenticated) {
+                _logger.LogWarning("Failed login attempt for email: {Email} - Invalid password", email);
                 return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "Invalid Email or password");
+            }
 
             //if (!userFromDb.EmailConfirmed)
             //return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "Please confirm your email first");
 
-            return await AuthenticateAsync(userFromDb);
+            var result = await AuthenticateAsync(userFromDb);
+            if (result.Succeeded) {
+                _logger.LogInformation("Successful login for user: {Email}", email);
+            }
+            return result;
         }
 
         public async Task<ServiceOperationResult<AuthResult>> ReAuthenticateAsync(string refreshToken, string accessToken, CancellationToken ct = default) {
             var isValidAccessToken = ValidateAccessToken(accessToken, validateLifetime: false);
-            if (!isValidAccessToken)
+            if (!isValidAccessToken) {
+                _logger.LogWarning("ReAuthenticate failed - Invalid access token");
                 return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "Invalid access token");
+            }
 
             var jwt = ReadJWT(accessToken);
-            if (jwt is null)
+            if (jwt is null) {
+                _logger.LogWarning("ReAuthenticate failed - Cannot read JWT");
                 return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "Invalid access token");
+            }
 
             var domainUserId = jwt.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (domainUserId is null)
+            if (domainUserId is null) {
+                _logger.LogWarning("ReAuthenticate failed - User id is null in JWT");
                 return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "User id is null");
+            }
 
             var appUser = await _userManager.Users.Include(au => au.DomainUser).FirstOrDefaultAsync(au => au.DomainUserId.ToString() == domainUserId, cancellationToken: ct);
-            if (appUser is null)
+            if (appUser is null) {
+                _logger.LogWarning("ReAuthenticate failed - User not found for ID: {UserId}", domainUserId);
                 return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "User not found");
+            }
 
             var currentRefreshTokenSpec = new ActiveRefreshTokenByJtiAndTokenSpec(jwt.Id, refreshToken, appUser.Id);
             var currentRefreshToken = await _unitOfWork.RefreshTokens.FirstOrDefaultAsync(currentRefreshTokenSpec, ct);
 
 
-            if (currentRefreshToken is null || !currentRefreshToken.IsActive)
+            if (currentRefreshToken is null || !currentRefreshToken.IsActive) {
+                _logger.LogWarning("ReAuthenticate failed - Invalid or inactive refresh token for user: {Email}", appUser.Email);
                 return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "Refresh token is not valid");
+            }
 
             //new jwt result
             var jwtResultOperation = await AuthenticateAsync(appUser, currentRefreshToken!.Expires);
@@ -92,6 +113,7 @@ namespace Template.Infrastructure.Services {
 
             currentRefreshToken.Revoke();
             await _unitOfWork.RefreshTokens.UpdateAsync(currentRefreshToken, ct);
+            _logger.LogInformation("Successful token refresh for user: {Email}", appUser.Email);
             return jwtResultOperation;
         }
 
@@ -102,16 +124,21 @@ namespace Template.Infrastructure.Services {
 
             int domainUserId = _currentUserService.UserId!.Value;
             var appUser = await _userManager.Users.FirstOrDefaultAsync(au => au.DomainUserId == domainUserId, cancellationToken: ct);
-            if (appUser is null)
+            if (appUser is null) {
+                _logger.LogWarning("Logout failed - User not found for ID: {UserId}", domainUserId);
                 return ServiceOperationResult.Failure(ServiceOperationStatus.NotFound, "User not found!");
+            }
 
             var refreshTokenFromDb = await _unitOfWork.RefreshTokens.GetAsync(r => r.Token == refreshToken && r.UserId == appUser.Id, ct);
 
-            if (refreshTokenFromDb is null || !refreshTokenFromDb.IsActive)
+            if (refreshTokenFromDb is null || !refreshTokenFromDb.IsActive) {
+                _logger.LogWarning("Logout failed - Invalid refresh token for user: {Email}", appUser.Email);
                 return ServiceOperationResult.Failure(ServiceOperationStatus.NotFound, "You maybe signed out!");
+            }
 
             refreshTokenFromDb.Revoke();
             await _unitOfWork.RefreshTokens.UpdateAsync(refreshTokenFromDb, ct);
+            _logger.LogInformation("Successful logout for user: {Email}", appUser.Email);
             return ServiceOperationResult.Success(message: "Logout successfull");
 
         }

@@ -1,3 +1,4 @@
+using Serilog;
 using Template.API.Extentions;
 using Template.API.Middlewares;
 
@@ -6,8 +7,10 @@ namespace Template.API {
         public static async Task Main(string[] args) {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllers();
-            builder.Services.AddServices(builder.Configuration);
+            builder.Services.AddDependencies(builder.Configuration);
+            builder.Host.UseSerilog((hostingContext, configuration) => {
+                configuration.ReadFrom.Configuration(hostingContext.Configuration);
+            });
 
 
             var app = builder.Build();
@@ -19,7 +22,7 @@ namespace Template.API {
                 app.UseSwaggerUI();
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseSerilogRequestLogging();
             app.UseErrorHandling();
             app.UseForwardedHeaders();   // Use Forwarded Headers (must be early in pipeline)
             app.UseSecurityHeaders();

@@ -23,10 +23,10 @@ namespace Template.API {
     public static class ApiServiceRegistration {
         private const string GuestIdKey = "GuestId";   // used for ratelimiting
 
-        public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration) {
+        public static IServiceCollection AddDependencies(this IServiceCollection services, IConfiguration configuration) {
+            services.AddCore();
             services.AddInfrastructure(configuration);
             AddApi(services, configuration);
-            services.AddCore();
 
 
             return services;
@@ -36,7 +36,7 @@ namespace Template.API {
 
 
         private static IServiceCollection AddApi(IServiceCollection services, IConfiguration configuration) {
-
+            services.AddControllers();
             AddAuthenticationConfigurations(services, configuration);
             AddSwaggerConfigurations(services);
             AddAutorizationConfigurations(services);

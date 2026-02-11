@@ -463,3 +463,7 @@ FodyWeavers.xsd
 **/.env.*.local
 **/appsettings.Development.json
 **/appsettings.Production.json
+
+# Serilog/Logging files
+**/Logs/
+*.log
