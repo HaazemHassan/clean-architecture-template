@@ -7,6 +7,7 @@ namespace Template.API {
         public static async Task Main(string[] args) {
             var builder = WebApplication.CreateBuilder(args);
 
+
             builder.Services.AddDependencies(builder.Configuration);
             builder.Host.UseSerilog((hostingContext, configuration) => {
                 configuration.ReadFrom.Configuration(hostingContext.Configuration);
@@ -22,21 +23,23 @@ namespace Template.API {
                 app.UseSwaggerUI();
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseExceptionHandler();
             app.UseSerilogRequestLogging();
-            app.UseErrorHandling();
             app.UseForwardedHeaders();   // Use Forwarded Headers (must be early in pipeline)
             app.UseSecurityHeaders();
             app.UseHttpsRedirection();
 
             app.UseCustomHangfireDashboard();
             app.RegisterRecurringJobs();
+            app.UseCors();
 
             app.UseGuestSession();
             app.UseAuthentication();
             app.UseAuthorization();
 
             if (app.Environment.IsProduction()) {
-                app.UseRateLimiter();    //must be after UseAuthentication and UseAuthorization be cause we are using user identity name in rate limiting policy
+                app.UseRateLimiter();
             }
 
             app.MapControllers();

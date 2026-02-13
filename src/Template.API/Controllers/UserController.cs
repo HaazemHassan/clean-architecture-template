@@ -95,6 +95,9 @@ namespace Template.API.Controllers {
         [Authorize(Roles = $"{nameof(UserRole.SuperAdmin)},{nameof(UserRole.Admin)}")]
         public async Task<IActionResult> AddUser([FromBody] AddUserCommand command) {
             var result = await Mediator.Send(command);
+            if (result.Succeeded)
+                return CreatedAtAction(nameof(GetById), new { Id = result.Data!.Id }, result);
+
             return NewResult(result);
         }
 

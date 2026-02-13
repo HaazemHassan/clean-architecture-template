@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.RateLimiting;
 using Template.Api.Filters;
 using Template.API.Auhtorization;
+using Template.API.Exceptions;
 using Template.API.RateLimiting;
 using Template.API.Services;
 using Template.Core;
@@ -43,6 +44,9 @@ namespace Template.API {
             AddRateLimitingConfigurations(services, configuration);
             AddHangfireConfiguration(services, configuration);
 
+            // Register Exception Handler
+            services.AddExceptionHandler<GlobalExceptionHandler>();
+            services.AddProblemDetails();
 
             #region Api Services
             services.AddTransient<ICurrentUserService, CurrentUserService>();
