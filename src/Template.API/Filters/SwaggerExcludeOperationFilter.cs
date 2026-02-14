@@ -1,9 +1,9 @@
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
-using Template.Core.Attributes;
+using Template.Application.Attributes;
 
-namespace Template.Api.Filters;
+namespace Template.API.Filters;
 
 /// <summary>
 /// Removes properties marked with <see cref="SwaggerExcludeAttribute"/> from the request body schema

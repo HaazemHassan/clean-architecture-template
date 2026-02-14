@@ -128,7 +128,7 @@ namespace Template.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Template.Core.Entities.IdentityEntities.ApplicationRole", b =>
+            modelBuilder.Entity("Template.Application.Entities.IdentityEntities.ApplicationRole", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -158,7 +158,7 @@ namespace Template.Infrastructure.Migrations
                     b.ToTable("AspNetRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Template.Core.Entities.IdentityEntities.ApplicationUser", b =>
+            modelBuilder.Entity("Template.Application.Entities.IdentityEntities.ApplicationUser", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -233,7 +233,7 @@ namespace Template.Infrastructure.Migrations
                     b.ToTable("AspNetUsers", "identity");
                 });
 
-            modelBuilder.Entity("Template.Core.Entities.RefreshToken", b =>
+            modelBuilder.Entity("Template.Application.Entities.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -267,7 +267,7 @@ namespace Template.Infrastructure.Migrations
                     b.ToTable("RefreshToken");
                 });
 
-            modelBuilder.Entity("Template.Core.Entities.UserEntities.DomainUser", b =>
+            modelBuilder.Entity("Template.Domain.Entities.UserEntities.DomainUser", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -322,7 +322,7 @@ namespace Template.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
-                    b.HasOne("Template.Core.Entities.IdentityEntities.ApplicationRole", null)
+                    b.HasOne("Template.Application.Entities.IdentityEntities.ApplicationRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -331,7 +331,7 @@ namespace Template.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
-                    b.HasOne("Template.Core.Entities.IdentityEntities.ApplicationUser", null)
+                    b.HasOne("Template.Application.Entities.IdentityEntities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -340,7 +340,7 @@ namespace Template.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
-                    b.HasOne("Template.Core.Entities.IdentityEntities.ApplicationUser", null)
+                    b.HasOne("Template.Application.Entities.IdentityEntities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -349,13 +349,13 @@ namespace Template.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
                 {
-                    b.HasOne("Template.Core.Entities.IdentityEntities.ApplicationRole", null)
+                    b.HasOne("Template.Application.Entities.IdentityEntities.ApplicationRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Template.Core.Entities.IdentityEntities.ApplicationUser", null)
+                    b.HasOne("Template.Application.Entities.IdentityEntities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -364,33 +364,33 @@ namespace Template.Infrastructure.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
-                    b.HasOne("Template.Core.Entities.IdentityEntities.ApplicationUser", null)
+                    b.HasOne("Template.Application.Entities.IdentityEntities.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Template.Core.Entities.IdentityEntities.ApplicationUser", b =>
+            modelBuilder.Entity("Template.Application.Entities.IdentityEntities.ApplicationUser", b =>
                 {
-                    b.HasOne("Template.Core.Entities.UserEntities.DomainUser", "DomainUser")
+                    b.HasOne("Template.Domain.Entities.UserEntities.DomainUser", "DomainUser")
                         .WithOne()
-                        .HasForeignKey("Template.Core.Entities.IdentityEntities.ApplicationUser", "DomainUserId")
+                        .HasForeignKey("Template.Application.Entities.IdentityEntities.ApplicationUser", "DomainUserId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("DomainUser");
                 });
 
-            modelBuilder.Entity("Template.Core.Entities.RefreshToken", b =>
+            modelBuilder.Entity("Template.Application.Entities.RefreshToken", b =>
                 {
-                    b.HasOne("Template.Core.Entities.IdentityEntities.ApplicationUser", null)
+                    b.HasOne("Template.Application.Entities.IdentityEntities.ApplicationUser", null)
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Template.Core.Entities.IdentityEntities.ApplicationUser", b =>
+            modelBuilder.Entity("Template.Application.Entities.IdentityEntities.ApplicationUser", b =>
                 {
                     b.Navigation("RefreshTokens");
                 });

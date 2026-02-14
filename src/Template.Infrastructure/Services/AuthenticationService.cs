@@ -7,17 +7,18 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Template.Core.Abstracts.ApiAbstracts;
-using Template.Core.Abstracts.InfrastructureAbstracts.Repositories;
-using Template.Core.Abstracts.InfrastructureAbstracts.Services;
-using Template.Core.Bases.Authentication;
-using Template.Core.Bases.Responses;
-using Template.Core.Entities;
-using Template.Core.Entities.IdentityEntities;
-using Template.Core.Enums;
-using Template.Core.Features.Users.Queries.Responses;
+using Template.Application.Common.Responses;
+using Template.Application.Contracts.Services.Api;
+using Template.Application.Contracts.Services.Infrastructure;
+using Template.Application.Enums;
+using Template.Application.Features.Authentication.Common;
+using Template.Application.Features.Users.Queries.GetUserById;
+using Template.Domain.Abstracts.RepositoriesAbstracts;
+using Template.Domain.Entities;
+using Template.Infrastructure.Common.Options;
 using Template.Infrastructure.Data;
-using Template.Infrastructure.Specefications.RefreshTokens;
+using Template.Infrastructure.Data.IdentityEntities;
+using Template.Infrastructure.Specifications.RefreshTokens;
 
 namespace Template.Infrastructure.Services {
     public class AuthenticationService : IAuthenticationService {
@@ -172,7 +173,7 @@ namespace Template.Infrastructure.Services {
 
             //prepare response
             string accessToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-            var userResponse = new GetUserByIdResponse {
+            var userResponse = new GetUserByIdQueryResponse {
                 Id = appUser.DomainUserId.Value,
                 Email = appUser.DomainUser.Email,
                 Address = appUser.DomainUser.Address!,

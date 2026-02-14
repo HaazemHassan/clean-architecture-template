@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
-using Template.Core.Abstracts.InfrastructureAbstracts.Repositories;
+using Template.Domain.Abstracts.RepositoriesAbstracts;
 using Template.Infrastructure.Data;
 
 namespace Template.Infrastructure.Repositories;
@@ -24,7 +24,7 @@ public class UnitOfWork : IUnitOfWork {
 
     public async Task<IDatabaseTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default) {
         _transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-        return new DataBaseTransaction(_transaction);
+        return new DatabaseTransaction(_transaction);
     }
 
 

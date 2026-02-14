@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using Template.Core.Abstracts.ApiAbstracts;
+using Template.Application.Contracts.Services.Api;
 
 namespace Template.API.Services {
     public class ClientContextService(IHttpContextAccessor httpContextAccessor) : IClientContextService {

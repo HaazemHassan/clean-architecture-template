@@ -6,16 +6,17 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.RateLimiting;
-using Template.Api.Filters;
-using Template.API.Auhtorization;
+using Template.API.Authorization;
+using Template.API.Authorization.Requirements;
 using Template.API.Exceptions;
+using Template.API.Filters;
 using Template.API.RateLimiting;
 using Template.API.Services;
-using Template.Core;
-using Template.Core.Abstracts.ApiAbstracts;
-using Template.Core.Bases.Authentication;
-using Template.Core.Bases.Responses;
+using Template.Application;
+using Template.Application.Common.Responses;
+using Template.Application.Contracts.Services.Api;
 using Template.Infrastructure;
+using Template.Infrastructure.Common.Options;
 
 
 
@@ -25,7 +26,7 @@ namespace Template.API {
         private const string GuestIdKey = "GuestId";   // used for ratelimiting
 
         public static IServiceCollection AddDependencies(this IServiceCollection services, IConfiguration configuration) {
-            services.AddCore();
+            services.AddApplication();
             services.AddInfrastructure(configuration);
             AddApi(services, configuration);
 

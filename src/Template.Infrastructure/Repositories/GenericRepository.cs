@@ -1,7 +1,7 @@
 ﻿using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using Template.Core.Abstracts.InfrastructureAbstracts.Repositories;
+using Template.Domain.Abstracts.RepositoriesAbstracts;
 using Template.Infrastructure.Data;
 
 namespace Template.Infrastructure.Repositories {

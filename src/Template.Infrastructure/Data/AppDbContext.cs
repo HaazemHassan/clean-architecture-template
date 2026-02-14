@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.Reflection;
-using Template.Core.Abstracts.ApiAbstracts;
-using Template.Core.Entities.Abstracts;
-using Template.Core.Entities.IdentityEntities;
+using Template.Application.Contracts.Services.Api;
+using Template.Domain.Common.Auditing;
+using Template.Infrastructure.Data.IdentityEntities;
 
 namespace Template.Infrastructure.Data {
     public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int, IdentityUserClaim<int>, IdentityUserRole<int>, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>> {

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
-using Template.Core.Bases.Responses;
+using Template.Application.Common.Responses;
 
 namespace Template.API.Exceptions;
 
@@ -16,7 +16,7 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IHos
         var userId = httpContext.User?.Identity?.Name ?? "Anonymous";
         var isDevelopment = _environment.IsDevelopment();
 
-        var responseModel = new Response { Succeeded = false };
+        var responseModel = new Response<string> { Succeeded = false };
         int statusCode;
 
         switch (exception) {

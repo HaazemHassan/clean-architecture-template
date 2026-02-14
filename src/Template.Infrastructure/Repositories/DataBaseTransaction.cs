@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
-using Template.Core.Abstracts.InfrastructureAbstracts.Repositories;
+using Template.Domain.Abstracts.RepositoriesAbstracts;
 
 namespace Template.Infrastructure.Repositories {
-    public class DataBaseTransaction : IDatabaseTransaction {
+    public class DatabaseTransaction : IDatabaseTransaction {
         private readonly IDbContextTransaction _dbContextTransaction;
 
-        public DataBaseTransaction(IDbContextTransaction efTransaction) {
+        public DatabaseTransaction(IDbContextTransaction efTransaction) {
             _dbContextTransaction = efTransaction;
         }
 

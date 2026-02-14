@@ -2,11 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Template.Core.Abstracts.InfrastructureAbstracts.Repositories;
-using Template.Core.Abstracts.InfrastructureAbstracts.Services;
-using Template.Core.Bases.Authentication;
-using Template.Core.Entities.IdentityEntities;
+using Template.Application.Common.Options;
+using Template.Application.Contracts.Services.Infrastructure;
+using Template.Domain.Abstracts.RepositoriesAbstracts;
 using Template.Infrastructure.Data;
+using Template.Infrastructure.Data.IdentityEntities;
 using Template.Infrastructure.Jobs;
 using Template.Infrastructure.Repositories;
 using Template.Infrastructure.Services;

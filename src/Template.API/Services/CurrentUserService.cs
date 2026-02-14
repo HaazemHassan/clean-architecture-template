@@ -1,6 +1,6 @@
 using System.Security.Claims;
-using Template.Core.Abstracts.ApiAbstracts;
-using Template.Core.Enums;
+using Template.Application.Contracts.Services.Api;
+using Template.Domain.Enums;
 
 namespace Template.API.Services {
     public class CurrentUserService : ICurrentUserService {

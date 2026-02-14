@@ -1,7 +1,8 @@
-﻿using Hangfire;
+﻿
+using Hangfire;
 using Template.Infrastructure.Jobs;
 
-namespace Template.Infrastructure.Extentions {
+namespace Template.Infrastructure.Extensions {
     public static class HangfireExtensions {
         public static void RegisterRecurringJobs(this IRecurringJobManager manager) {
             manager.AddOrUpdate<RefreshTokensCleanupJob>(

@@ -1,14 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Template.API.Filters;
-using Template.Core.Bases.Authentication;
-using Template.Core.Bases.Pagination;
-using Template.Core.Bases.Responses;
-using Template.Core.Enums;
-using Template.Core.Features.Users.Commands.RequestModels;
-using Template.Core.Features.Users.Commands.Responses;
-using Template.Core.Features.Users.Queries.Models;
-using Template.Core.Features.Users.Queries.Responses;
+using Template.Application.Common.Pagination;
+using Template.Application.Common.Responses;
+using Template.Application.Features.Authentication.Common;
+using Template.Application.Features.Users.Commands.AddUser;
+using Template.Application.Features.Users.Commands.Register;
+using Template.Application.Features.Users.Commands.UpdateProfile;
+using Template.Application.Features.Users.Queries.CheckEmailAvailability;
+using Template.Application.Features.Users.Queries.GetUserById;
+using Template.Application.Features.Users.Queries.GetUsersPaginated;
+using Template.Domain.Enums;
 
 namespace Template.API.Controllers {
 
@@ -47,7 +49,7 @@ namespace Template.API.Controllers {
         /// <response code="200">Returns paginated list of users</response>
         /// <response code="400">Invalid pagination parameters</response>
         [HttpGet]
-        [ProducesResponseType(typeof(PaginatedResult<GetUsersPaginatedResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PaginatedResult<GetUsersPaginatedQueryResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetAll([FromQuery] GetUsersPaginatedQuery query) {
             var result = await Mediator.Send(query);
@@ -64,7 +66,7 @@ namespace Template.API.Controllers {
         /// <response code="400">Invalid user ID format</response>
         [HttpGet("{Id:int}")]
         [Authorize]
-        [ProducesResponseType(typeof(Response<GetUserByIdResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Response<GetUserByIdQueryResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetById([FromRoute] GetUserByIdQuery query) {
@@ -114,7 +116,7 @@ namespace Template.API.Controllers {
         /// <response code="404">User not found</response>
         [HttpPatch("profile")]
         [Authorize]
-        [ProducesResponseType(typeof(Response<UpdateProfileResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Response<UpdateProfileCommandResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

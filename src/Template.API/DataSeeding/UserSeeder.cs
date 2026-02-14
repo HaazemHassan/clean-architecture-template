@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using Template.Core.Entities.IdentityEntities;
-using Template.Core.Entities.UserEntities;
+using Template.Domain.Entities;
+using Template.Infrastructure.Data.IdentityEntities;
 
 namespace Template.API.DataSeeding {
     public static class UserSeeder {

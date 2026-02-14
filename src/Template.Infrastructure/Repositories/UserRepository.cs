@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Template.Core.Abstracts.InfrastructureAbstracts.Repositories;
-using Template.Core.Entities.UserEntities;
+using Template.Domain.Abstracts.RepositoriesAbstracts;
+using Template.Domain.Entities;
 using Template.Infrastructure.Data;
 
 namespace Template.Infrastructure.Repositories {

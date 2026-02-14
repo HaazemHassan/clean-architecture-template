@@ -1,0 +1,34 @@
+using AutoMapper;
+using MediatR;
+using Template.Application.Common.Responses;
+using Template.Application.Contracts.Services.Infrastructure;
+using Template.Domain.Abstracts.RepositoriesAbstracts;
+using Template.Domain.Entities;
+
+namespace Template.Application.Features.Users.Commands.AddUser {
+    public class AddUserCommandHandler : ResponseHandler, IRequestHandler<AddUserCommand, Response<AddUserCommandResponse>> {
+
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        private readonly IApplicationUserService _applicationUserService;
+
+        public AddUserCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IApplicationUserService applicationUserService) {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _applicationUserService = applicationUserService;
+        }
+
+        public async Task<Response<AddUserCommandResponse>> Handle(AddUserCommand request, CancellationToken cancellationToken) {
+            var domainUser = _mapper.Map<DomainUser>(request);
+            var addUserResult = await _applicationUserService.AddUser(domainUser, request.Password, request.UserRole, cancellationToken);
+
+            if (!addUserResult.Succeeded)
+                return FromServiceResult<AddUserCommandResponse>(addUserResult);
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            var response = _mapper.Map<AddUserCommandResponse>(addUserResult.Data);
+            return Created(response);
+        }
+    }
+}

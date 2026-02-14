@@ -1,0 +1,24 @@
+using MediatR;
+using Template.Application.Common.Responses;
+using Template.Application.Contracts.Services.Infrastructure;
+using Template.Application.Features.Authentication.Common;
+using Template.Domain.Abstracts.RepositoriesAbstracts;
+
+namespace Template.Application.Features.Authentication.Commands.RefreshToken;
+
+public class RefreshTokenCommandHandler : ResponseHandler, IRequestHandler<RefreshTokenCommand, Response<AuthResult>> {
+    private readonly IAuthenticationService _authenticationService;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public RefreshTokenCommandHandler(IAuthenticationService authenticationService, IUnitOfWork unitOfWork) {
+        _authenticationService = authenticationService;
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<Response<AuthResult>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken) {
+        var authResult = await _authenticationService.ReAuthenticateAsync(request.RefreshToken!, request.AccessToken);
+        if (authResult.Succeeded)
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return FromServiceResult(authResult);
+    }
+}

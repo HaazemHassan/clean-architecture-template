@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Net;
-using Template.Core.Bases.Responses;
+using Template.Application.Common.Responses;
 
 namespace Template.API.Controllers {
     [Route("api/[controller]")]
@@ -27,7 +27,7 @@ namespace Template.API.Controllers {
             };
         }
 
-        protected ObjectResult NewResult(Response response) {
+        protected ObjectResult NewResult(Result response) {
             return response.StatusCode switch {
                 HttpStatusCode.OK => new OkObjectResult(response),
                 HttpStatusCode.Created => new CreatedResult(string.Empty, response),

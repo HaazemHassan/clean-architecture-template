@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
-using Template.Core.Entities.UserEntities;
+using Template.Domain.Entities;
 
-namespace Template.Core.Entities.IdentityEntities {
+namespace Template.Infrastructure.Data.IdentityEntities {
     public class ApplicationUser : IdentityUser<int> {
 
         public int? DomainUserId { get; set; }

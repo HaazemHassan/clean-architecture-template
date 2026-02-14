@@ -1,6 +1,6 @@
 ﻿using Hangfire;
 using Microsoft.Extensions.Logging;
-using Template.Core.Abstracts.InfrastructureAbstracts.Repositories;
+using Template.Domain.Abstracts.RepositoriesAbstracts;
 
 namespace Template.Infrastructure.Jobs {
     public class RefreshTokensCleanupJob {
@@ -22,7 +22,7 @@ namespace Template.Infrastructure.Jobs {
 
                 await _unitOfWork.RefreshTokens.DeleteExpiredTokensAsync(cutoffDate);
                 var deletedCount = await _unitOfWork.SaveChangesAsync();
-                
+
                 _logger.LogInformation("RefreshTokensCleanupJob completed successfully. Deleted {Count} expired tokens (cutoff: {CutoffDate})", deletedCount, cutoffDate);
             }
             catch (Exception ex) {

@@ -2,11 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Template.API.Filters;
-using Template.Core.Abstracts.ApiAbstracts;
-using Template.Core.Bases.Authentication;
-using Template.Core.Bases.Responses;
-using Template.Core.Features.Authentication.Commands.RequestsModels;
-using Template.Core.Features.Users.Commands.RequestModels;
+using Template.Application.Common.Responses;
+using Template.Application.Contracts.Services.Api;
+using Template.Application.Features.Authentication.Commands.Logout;
+using Template.Application.Features.Authentication.Commands.RefreshToken;
+using Template.Application.Features.Authentication.Commands.SignIn;
+using Template.Application.Features.Authentication.Common;
+using Template.Application.Features.Users.Commands.ChangePassword;
+using Template.Infrastructure.Common.Options;
 
 namespace Template.API.Controllers {
 

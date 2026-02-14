@@ -2,9 +2,9 @@
 using HangfireBasicAuthenticationFilter;
 using Microsoft.AspNetCore.Identity;
 using Template.API.DataSeeding;
-using Template.Core.Bases.Authentication;
-using Template.Core.Entities.IdentityEntities;
-using Template.Infrastructure.Extentions;
+using Template.Infrastructure.Common.Options;
+using Template.Infrastructure.Data.IdentityEntities;
+using Template.Infrastructure.Extensions;
 
 namespace Template.API.Extentions {
     public static class WebApplicationExtensions {

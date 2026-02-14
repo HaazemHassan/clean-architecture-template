@@ -1,10 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Template.Core.Abstracts.ApiAbstracts;
-using Template.Core.Abstracts.InfrastructureAbstracts.Repositories;
-using Template.Core.Bases.Responses;
-using Template.Core.Entities.IdentityEntities;
-using Template.Core.Entities.UserEntities;
-using Template.Core.Enums;
+using Template.Application.Common.Responses;
+using Template.Application.Contracts.Services.Api;
+using Template.Application.Contracts.Services.Infrastructure;
+using Template.Application.Enums;
+using Template.Domain.Abstracts.RepositoriesAbstracts;
+using Template.Domain.Entities;
+using Template.Domain.Enums;
+using Template.Infrastructure.Common;
+using Template.Infrastructure.Data.IdentityEntities;
+using Template.Infrastructure.Extensions;
 
 namespace Template.Infrastructure.Services {
     public class ApplicationUserService : IApplicationUserService {
@@ -23,28 +27,24 @@ namespace Template.Infrastructure.Services {
 
         public async Task<ServiceOperationResult<DomainUser>> AddUser(DomainUser user, string password, UserRole role = UserRole.User, CancellationToken ct = default) {
 
-            if (!_currentUserService.IsInRole(UserRole.Admin))
-                return ServiceOperationResult<DomainUser>.Failure(ServiceOperationStatus.Forbidden);
-            else if (!_currentUserService.IsAuthenticated)
-                role = UserRole.User;
-
-            if (await _unitOfWork.Users.AnyAsync(x => x.Email == user.Email, ct))
-                return ServiceOperationResult<DomainUser>.
-                    Failure(ServiceOperationStatus.AlreadyExists, "Email already exists.");
-
-            if (await _unitOfWork.Users.AnyAsync(x => x.PhoneNumber == user.PhoneNumber, ct))
-                return ServiceOperationResult<DomainUser>.
-                    Failure(ServiceOperationStatus.AlreadyExists, "This phone number is used.");
-
-
             var applicationUser = ApplicationUser.Create(user.Email, user.PhoneNumber);
             applicationUser.AssignDomainUser(user);
 
             var createResult = await _userManager.CreateAsync(applicationUser, password);
 
-            if (!createResult.Succeeded)
-                return ServiceOperationResult<DomainUser>.
-                    Failure(ServiceOperationStatus.Failed, "Failed to create user. Please try again later.");
+            if (!createResult.Succeeded) {
+                if (createResult.HasError(IdentityErrorCodes.DuplicateEmail))
+                    return ServiceOperationResult<DomainUser>
+                          .Failure(ServiceOperationStatus.AlreadyExists, "This Email already exists");
+
+                if (createResult.HasError(IdentityErrorCodes.DuplicatePhoneNumber))
+                    return ServiceOperationResult<DomainUser>
+                          .Failure(ServiceOperationStatus.AlreadyExists, "Phone number already exists");
+
+                return ServiceOperationResult<DomainUser>
+                           .Failure(ServiceOperationStatus.Failed, "Failed to create user. Please try again later.");
+            }
+
 
             var addToRoleResult = await _userManager.AddToRoleAsync(applicationUser, role.ToString()!);
             if (!addToRoleResult.Succeeded)
@@ -52,14 +52,8 @@ namespace Template.Infrastructure.Services {
                     Failure(ServiceOperationStatus.Failed, "Failed to create user. Please try again later.");
 
 
-            //var succedded = await SendConfirmationEmailAsync(applicationUser);
-            //if (!succedded)
-            //    return ServiceOperationResult.Failed;
-
-            return ServiceOperationResult<DomainUser>.
-                Success(user, ServiceOperationStatus.Created);
+            return ServiceOperationResult<DomainUser>.Success(user, ServiceOperationStatus.Created);
         }
-
 
     }
 }
