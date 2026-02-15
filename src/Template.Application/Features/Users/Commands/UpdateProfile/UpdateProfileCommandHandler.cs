@@ -2,7 +2,6 @@
 using MediatR;
 using Template.Application.Common.Responses;
 using Template.Application.Contracts.Services.Api;
-using Template.Application.Contracts.Services.Application;
 using Template.Domain.Abstracts.RepositoriesAbstracts;
 using Template.Domain.Entities;
 
@@ -10,13 +9,11 @@ namespace Template.Application.Features.Users.Commands.UpdateProfile {
     public class UpdateProfileCommandHandler : ResponseHandler, IRequestHandler<UpdateProfileCommand, Response<UpdateProfileCommandResponse>> {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IDomainUserService _domainUserService;
         private readonly ICurrentUserService _currentUserService;
 
-        public UpdateProfileCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IDomainUserService domainUserService, ICurrentUserService currentUserService) {
+        public UpdateProfileCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService) {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _domainUserService = domainUserService;
             _currentUserService = currentUserService;
 
         }

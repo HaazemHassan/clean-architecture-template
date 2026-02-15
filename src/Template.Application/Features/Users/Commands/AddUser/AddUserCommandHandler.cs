@@ -19,7 +19,7 @@ namespace Template.Application.Features.Users.Commands.AddUser {
         }
 
         public async Task<Response<AddUserCommandResponse>> Handle(AddUserCommand request, CancellationToken cancellationToken) {
-            var domainUser = _mapper.Map<DomainUser>(request);
+            var domainUser = new DomainUser(request.FirstName, request.LastName, request.Email, request.PhoneNumber, request.Address);
             var addUserResult = await _applicationUserService.AddUser(domainUser, request.Password, request.UserRole, cancellationToken);
 
             if (!addUserResult.Succeeded)

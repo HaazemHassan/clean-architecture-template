@@ -8,7 +8,7 @@ using Template.Domain.Common.Auditing;
 using Template.Infrastructure.Data.IdentityEntities;
 
 namespace Template.Infrastructure.Data {
-    public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int, IdentityUserClaim<int>, IdentityUserRole<int>, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>> {
+    internal class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int, IdentityUserClaim<int>, IdentityUserRole<int>, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>> {
         private readonly ICurrentUserService _currentUserService;
 
         public AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserService currentUserService) : base(options) {

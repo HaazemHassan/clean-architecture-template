@@ -21,12 +21,12 @@ namespace Template.Application.Features.Users.Commands.Register {
         }
 
         public async Task<Response<AuthResult>> Handle(RegisterCommand request, CancellationToken cancellationToken) {
-            var userMapped = _mapper.Map<DomainUser>(request);
+            var userToAdd = new DomainUser(request.FirstName, request.LastName, request.Email, request.PhoneNumber, request.Address);
             ServiceOperationResult<DomainUser> addUserResult;
             await using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);
             {
-                addUserResult = await _applicationUserService.AddUser(userMapped, request.Password, ct: cancellationToken);
-                if (addUserResult.Succeeded)
+                addUserResult = await _applicationUserService.AddUser(userToAdd, request.Password, ct: cancellationToken);
+                if (!addUserResult.Succeeded)
                     return FromServiceResult<AuthResult>(addUserResult);
 
                 await transaction.CommitAsync(cancellationToken);

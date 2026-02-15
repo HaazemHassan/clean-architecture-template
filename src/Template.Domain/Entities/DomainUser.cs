@@ -1,20 +1,29 @@
-﻿using Template.Domain.Entities.Bases;
+﻿using Template.Domain.Primitives;
 
-namespace Template.Domain.Entities {
-    public class DomainUser : FullAuditableEntity<int> {
-        public DomainUser() {
+namespace Template.Domain.Entities
+{
+    public sealed class DomainUser : FullAuditableEntity<int>
+    {
+        public DomainUser(string firstName, string lastName, string email, string? phoneNumber = null, string? address = null)
+        {
+            FirstName = firstName;
+            LastName = lastName;
+            Email = email;
+            PhoneNumber = phoneNumber;
+            Address = address;
         }
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string PhoneNumber { get; set; } = string.Empty;
-        public string? Address { get; set; }
+        public string FirstName { get; private set; } = string.Empty;
+        public string LastName { get; private set; } = string.Empty;
+        public string Email { get; private set; } = string.Empty;
+        public string PhoneNumber { get; private set; } = string.Empty;
+        public string? Address { get; private set; }
 
         public string FullName => $"{FirstName} {LastName}";
 
 
 
-        public void UpdateInfo(string? firstName = null, string? lastName = null, string? phoneNumber = null, string? address = null) {
+        public void UpdateInfo(string? firstName = null, string? lastName = null, string? phoneNumber = null, string? address = null)
+        {
             if (!string.IsNullOrWhiteSpace(firstName))
                 FirstName = firstName;
 
@@ -29,14 +38,6 @@ namespace Template.Domain.Entities {
         }
 
 
-        public static DomainUser Create(string firstName, string lastName, string email, string phoneNumber, string? address = null) {
-            return new DomainUser {
-                FirstName = firstName,
-                LastName = lastName,
-                Email = email,
-                PhoneNumber = phoneNumber,
-                Address = address
-            };
-        }
+
     }
 }

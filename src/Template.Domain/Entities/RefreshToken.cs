@@ -1,11 +1,20 @@
 ﻿using Template.Domain.Common.Auditing;
-using Template.Domain.Entities.Bases;
+using Template.Domain.Primitives.Template.Domain.Primitives;
 
-namespace Template.Domain.Entities {
-    public class RefreshToken : BaseEntity<int>, IHasCreationTime {
-        public int Id { get; set; }
+namespace Template.Domain.Entities
+{
+    public sealed class RefreshToken : BaseEntity<int>, IHasCreationTime
+    {
+        public RefreshToken(string token, DateTime expires, string accessTokenJTI, int userId)
+        {
+            Token = token;
+            Expires = expires;
+            AccessTokenJTI = accessTokenJTI;
+            UserId = userId;
+        }
+
         public int UserId { get; set; }      //ApplicationUser not DomainUser
-        public string? AccessTokenJTI { get; set; }
+        public string AccessTokenJTI { get; set; }
         public string Token { get; set; } = string.Empty;
         public DateTime Expires { get; set; }
         public bool IsExpired => DateTime.UtcNow >= Expires;
@@ -14,7 +23,8 @@ namespace Template.Domain.Entities {
 
         public DateTime CreatedAt { get; set; }
 
-        public void Revoke() {
+        public void Revoke()
+        {
             RevokationDate = DateTime.UtcNow;
         }
     }

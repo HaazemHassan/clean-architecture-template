@@ -11,7 +11,7 @@ using Template.Infrastructure.Data.IdentityEntities;
 using Template.Infrastructure.Extensions;
 
 namespace Template.Infrastructure.Services {
-    public class ApplicationUserService : IApplicationUserService {
+    internal class ApplicationUserService : IApplicationUserService {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IClientContextService _clientContextService;
         private readonly ICurrentUserService _currentUserService;
@@ -26,8 +26,13 @@ namespace Template.Infrastructure.Services {
         }
 
         public async Task<ServiceOperationResult<DomainUser>> AddUser(DomainUser user, string password, UserRole role = UserRole.User, CancellationToken ct = default) {
+            var userByPhone = await _unitOfWork.Users.AnyAsync(u => u.PhoneNumber == user.PhoneNumber, ct);
 
-            var applicationUser = ApplicationUser.Create(user.Email, user.PhoneNumber);
+            if (userByPhone)
+                return ServiceOperationResult<DomainUser>
+                    .Failure(ServiceOperationStatus.AlreadyExists, "Phone number already exists");
+
+            var applicationUser = new ApplicationUser(user.Email, user.PhoneNumber);
             applicationUser.AssignDomainUser(user);
 
             var createResult = await _userManager.CreateAsync(applicationUser, password);
@@ -36,10 +41,6 @@ namespace Template.Infrastructure.Services {
                 if (createResult.HasError(IdentityErrorCodes.DuplicateEmail))
                     return ServiceOperationResult<DomainUser>
                           .Failure(ServiceOperationStatus.AlreadyExists, "This Email already exists");
-
-                if (createResult.HasError(IdentityErrorCodes.DuplicatePhoneNumber))
-                    return ServiceOperationResult<DomainUser>
-                          .Failure(ServiceOperationStatus.AlreadyExists, "Phone number already exists");
 
                 return ServiceOperationResult<DomainUser>
                            .Failure(ServiceOperationStatus.Failed, "Failed to create user. Please try again later.");

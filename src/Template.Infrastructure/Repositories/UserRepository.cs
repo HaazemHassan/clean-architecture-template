@@ -4,7 +4,7 @@ using Template.Domain.Entities;
 using Template.Infrastructure.Data;
 
 namespace Template.Infrastructure.Repositories {
-    public class UserRepository : GenericRepository<DomainUser>, IUserRepository {
+    internal class UserRepository : GenericRepository<DomainUser>, IUserRepository {
 
         private readonly DbSet<DomainUser> _users;
 

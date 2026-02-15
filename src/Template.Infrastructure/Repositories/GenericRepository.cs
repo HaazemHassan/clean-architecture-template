@@ -5,7 +5,7 @@ using Template.Domain.Abstracts.RepositoriesAbstracts;
 using Template.Infrastructure.Data;
 
 namespace Template.Infrastructure.Repositories {
-    public class GenericRepository<T> : RepositoryBase<T>, IGenericRepository<T> where T : class {
+    internal class GenericRepository<T> : RepositoryBase<T>, IGenericRepository<T> where T : class {
 
 
         protected readonly AppDbContext _dbContext;

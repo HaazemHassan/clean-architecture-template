@@ -1,7 +1,11 @@
 ﻿using Template.Domain.Common.Auditing;
+using Template.Domain.Primitives.Template.Domain.Primitives;
 
-namespace Template.Domain.Entities.Bases {
-    public abstract class AuditableEntity<TId> : BaseEntity<TId>, IAuditableEntity {
+namespace Template.Domain.Primitives
+{
+    public abstract class AuditableEntity<TId> : BaseEntity<TId>, IAuditableEntity where TId : notnull
+    {
+
         public DateTime CreatedAt { get; set; }
         public int? CreatedBy { get; set; }
         public DateTime? UpdatedAt { get; set; }

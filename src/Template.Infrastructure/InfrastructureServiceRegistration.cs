@@ -87,6 +87,8 @@ public static class InfrastructureServiceRegistration {
     private static IServiceCollection AddServices(IServiceCollection services) {
         services.AddTransient<IApplicationUserService, ApplicationUserService>();
         services.AddTransient<IAuthenticationService, AuthenticationService>();
+        services.AddTransient<ISeederService, SeederService>();
+
 
         return services;
     }

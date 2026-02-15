@@ -3,8 +3,6 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using Template.Application.Behaviors;
-using Template.Application.Contracts.Services.Application;
-using Template.Application.Services;
 
 namespace Template.Application {
     public static class ApplicationServiceRegistration {
@@ -28,7 +26,6 @@ namespace Template.Application {
         }
 
         public static void AddDomainServices(IServiceCollection services) {
-            services.AddScoped<IDomainUserService, DomainUserService>();
         }
     }
 }

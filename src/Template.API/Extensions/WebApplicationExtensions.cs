@@ -1,9 +1,9 @@
 ﻿using Hangfire;
 using HangfireBasicAuthenticationFilter;
-using Microsoft.AspNetCore.Identity;
-using Template.API.DataSeeding;
+using System.Text.Json;
+using Template.Application.Contracts.Services.Infrastructure;
 using Template.Infrastructure.Common.Options;
-using Template.Infrastructure.Data.IdentityEntities;
+using Template.Infrastructure.Data.Seeding;
 using Template.Infrastructure.Extensions;
 
 namespace Template.API.Extentions {
@@ -33,11 +33,18 @@ namespace Template.API.Extentions {
                 //
                 */
 
-                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
 
-                await ApplicationRoleSeeder.SeedAsync(roleManager);
-                await UserSeeder.SeedAsync(userManager);
+
+                var seederService = scope.ServiceProvider.GetRequiredService<ISeederService>();
+
+                string rolesJson = await File.ReadAllTextAsync("DataSeeding/Roles.json");
+                string usersJson = await File.ReadAllTextAsync("DataSeeding/Users.json");
+
+                List<string>? rolesSeedData = JsonSerializer.Deserialize<List<string>>(rolesJson);
+                List<UserSeedDto>? usersSeedData = JsonSerializer.Deserialize<List<UserSeedDto>>(usersJson);
+
+                await seederService.SeedRolesAsync(rolesSeedData!);
+                await seederService.SeedUsersAsync(usersSeedData!);
 
             }
             #endregion

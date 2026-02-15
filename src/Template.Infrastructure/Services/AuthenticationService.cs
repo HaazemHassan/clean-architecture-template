@@ -21,7 +21,7 @@ using Template.Infrastructure.Data.IdentityEntities;
 using Template.Infrastructure.Specifications.RefreshTokens;
 
 namespace Template.Infrastructure.Services {
-    public class AuthenticationService : IAuthenticationService {
+    internal class AuthenticationService : IAuthenticationService {
 
         private readonly JwtSettings _jwtSettings;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -167,31 +167,41 @@ namespace Template.Infrastructure.Services {
             if (appUser is null || appUser.DomainUserId is null || appUser.DomainUser is null)
                 return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.InvalidParameters, "User cannot be null");
 
-            var jwtSecurityToken = await GenerateAccessToken(appUser);
-            var refreshToken = GenerateRefreshToken(appUser.Id, refreshTokenExpDate);
-            await AddRefreshTokenToDatabase(refreshToken, jwtSecurityToken.Id);
+
+            var userClaims = await GetUserClaims(appUser);
+
+            var jwtSecurityToken = GenerateAccessToken(userClaims);
+            var refreshToken = GenerateRefreshToken(appUser.Id, jwtSecurityToken.Id, refreshTokenExpDate);
+            await _unitOfWork.RefreshTokens.AddAsync(refreshToken);
 
             //prepare response
             string accessToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+
+            RefreshTokenDTO refreshTokenDto = new() {
+                Token = refreshToken.Token,
+                UserId = refreshToken.UserId,
+                ExpirationDate = refreshToken.Expires
+            };
+
             var userResponse = new GetUserByIdQueryResponse {
                 Id = appUser.DomainUserId.Value,
                 Email = appUser.DomainUser.Email,
                 Address = appUser.DomainUser.Address!,
                 PhoneNumber = appUser.DomainUser.PhoneNumber!
             };
-            AuthResult jwtResult = new(accessToken, refreshToken, userResponse);
+            AuthResult jwtResult = new(accessToken, refreshTokenDto, userResponse);
 
 
             return ServiceOperationResult<AuthResult>.Success(jwtResult, message: "Logged in successfully");
         }
 
-        private async Task<JwtSecurityToken> GenerateAccessToken(ApplicationUser user, List<Claim>? claims = null, DateTime? expDate = null) {
+        private JwtSecurityToken GenerateAccessToken(List<Claim> userClaims) {
             return new JwtSecurityToken(
                   issuer: _jwtSettings.Issuer,
                   audience: _jwtSettings.Audience,
-                  claims: claims ?? await GetUserClaims(user),
+                  claims: userClaims,
                   signingCredentials: GetSigningCredentials(),
-                  expires: expDate ?? DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes)
+                  expires: DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes)
               );
         }
         private async Task<List<Claim>> GetUserClaims(ApplicationUser user) {
@@ -223,19 +233,16 @@ namespace Template.Infrastructure.Services {
             var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtSettings.Secret));
             return new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
         }
-        private RefreshTokenDTO GenerateRefreshToken(int userId, DateTime? expirationDate = null) {
+        private RefreshToken GenerateRefreshToken(int userId, string accessTokenJTI, DateTime? expirationDate = null) {
             var randomBytes = new byte[64];
             RandomNumberGenerator.Fill(randomBytes);
-            string refreshTokenValue = Convert.ToBase64String(randomBytes);
+            string Token = Convert.ToBase64String(randomBytes);
 
-            return new RefreshTokenDTO {
-                Token = refreshTokenValue,
-                ExpirationDate = expirationDate ?? DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
-                UserId = userId
-            };
-
+            expirationDate = expirationDate ?? DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays);
+            return new RefreshToken(Token, expirationDate.Value, accessTokenJTI, userId);
 
         }
+
 
         private bool ValidateAccessToken(string token, bool validateLifetime = true) {
             var tokenValidationParameters = new TokenValidationParameters {
@@ -258,15 +265,7 @@ namespace Template.Infrastructure.Services {
 
             return principal is not null;
         }
-        private async Task AddRefreshTokenToDatabase(RefreshTokenDTO refreshTokenDTO, string accessTokenJti) {
-            var refreshToken = new RefreshToken {
-                Expires = refreshTokenDTO.ExpirationDate,
-                AccessTokenJTI = accessTokenJti,
-                Token = refreshTokenDTO.Token,
-                UserId = refreshTokenDTO.UserId
-            };
-            await _unitOfWork.RefreshTokens.AddAsync(refreshToken);
-        }
+
         private static JwtSecurityToken ReadJWT(string accessToken) {
             if (string.IsNullOrEmpty(accessToken)) {
                 throw new ArgumentNullException(nameof(accessToken));

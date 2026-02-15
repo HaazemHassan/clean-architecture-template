@@ -3,22 +3,21 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Template.Domain.Entities;
 
 namespace Template.Infrastructure.Data.IdentityEntities {
-    public class ApplicationUser : IdentityUser<int> {
+    internal class ApplicationUser : IdentityUser<int> {
 
-        public int? DomainUserId { get; set; }
+
+        public ApplicationUser(string email, string phoneNumber) {
+            UserName = email;
+            Email = email;
+            PhoneNumber = phoneNumber;
+        }
+
+        public int? DomainUserId { get; private set; }
 
         [ForeignKey(nameof(DomainUserId))]
-        public virtual DomainUser? DomainUser { get; set; }
-        public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new HashSet<RefreshToken>();
+        public virtual DomainUser? DomainUser { get; private set; }
+        public virtual ICollection<RefreshToken> RefreshTokens { get; private set; } = new HashSet<RefreshToken>();
 
-
-        public static ApplicationUser Create(string email, string phoneNumber) {
-            return new ApplicationUser {
-                UserName = email,
-                Email = email,
-                PhoneNumber = phoneNumber
-            };
-        }
 
         public void AssignDomainUser(DomainUser domainUser) {
             if (domainUser is null)

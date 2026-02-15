@@ -4,7 +4,7 @@ using Template.Domain.Entities;
 using Template.Infrastructure.Data;
 
 namespace Template.Infrastructure.Repositories {
-    public class RefreshTokenRepository : GenericRepository<RefreshToken>, IRefreshTokenRepository {
+    internal class RefreshTokenRepository : GenericRepository<RefreshToken>, IRefreshTokenRepository {
 
         private readonly DbSet<RefreshToken> _refreshTokens;
 
