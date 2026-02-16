@@ -1,6 +1,6 @@
 ﻿using Hangfire;
 using Microsoft.Extensions.Logging;
-using Template.Domain.Abstracts.RepositoriesAbstracts;
+using Template.Domain.Contracts.Repositories;
 
 namespace Template.Infrastructure.Jobs {
     public class RefreshTokensCleanupJob {

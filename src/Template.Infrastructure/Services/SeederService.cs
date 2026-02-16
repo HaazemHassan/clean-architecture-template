@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using Template.Application.Contracts.Services.Infrastructure;
-using Template.Domain.Abstracts.RepositoriesAbstracts;
+using Template.Domain.Contracts.Repositories;
 using Template.Domain.Entities;
 using Template.Infrastructure.Data.IdentityEntities;
 using Template.Infrastructure.Data.Seeding;

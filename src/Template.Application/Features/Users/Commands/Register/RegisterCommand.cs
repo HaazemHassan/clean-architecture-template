@@ -1,9 +1,12 @@
 ﻿using MediatR;
 using Template.Application.Common.Responses;
-using Template.Application.Features.Authentication.Common;
+using Template.Application.Contracts;
+using Template.Application.Features.Users.Common;
 
-namespace Template.Application.Features.Users.Commands.Register {
-    public class RegisterCommand : IRequest<Response<AuthResult>> {
+namespace Template.Application.Features.Users.Commands.Register
+{
+    public class RegisterCommand : IRequest<Response<UserResponse>>, ITransactionalRequest
+    {
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;

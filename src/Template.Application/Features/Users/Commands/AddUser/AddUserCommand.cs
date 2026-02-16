@@ -1,9 +1,12 @@
 ﻿using MediatR;
 using Template.Application.Common.Responses;
+using Template.Application.Contracts;
 using Template.Domain.Enums;
 
-namespace Template.Application.Features.Users.Commands.AddUser {
-    public class AddUserCommand : IRequest<Response<AddUserCommandResponse>> {
+namespace Template.Application.Features.Users.Commands.AddUser
+{
+    public class AddUserCommand : IRequest<Response<AddUserCommandResponse>>, ITransactionalRequest
+    {
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;

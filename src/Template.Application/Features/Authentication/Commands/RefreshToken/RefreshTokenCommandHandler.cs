@@ -2,11 +2,11 @@ using MediatR;
 using Template.Application.Common.Responses;
 using Template.Application.Contracts.Services.Infrastructure;
 using Template.Application.Features.Authentication.Common;
-using Template.Domain.Abstracts.RepositoriesAbstracts;
+using Template.Domain.Contracts.Repositories;
 
 namespace Template.Application.Features.Authentication.Commands.RefreshToken;
 
-public class RefreshTokenCommandHandler : ResponseHandler, IRequestHandler<RefreshTokenCommand, Response<AuthResult>> {
+public class RefreshTokenCommandHandler : ResultHandler, IRequestHandler<RefreshTokenCommand, Response<AuthResult>> {
     private readonly IAuthenticationService _authenticationService;
     private readonly IUnitOfWork _unitOfWork;
 

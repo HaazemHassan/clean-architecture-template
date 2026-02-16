@@ -21,6 +21,7 @@ namespace Template.Application.Specifications.Users {
                 Id = u.Id,
                 FirstName = u.FirstName,
                 LastName = u.LastName,
+                FullName = u.FullName,
                 Email = u.Email,
                 Address = u.Address ?? string.Empty,
                 Phone = u.PhoneNumber

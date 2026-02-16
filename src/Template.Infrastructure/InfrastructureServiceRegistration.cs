@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Template.Application.Common.Options;
 using Template.Application.Contracts.Services.Infrastructure;
-using Template.Domain.Abstracts.RepositoriesAbstracts;
+using Template.Domain.Contracts.Repositories;
 using Template.Infrastructure.Data;
 using Template.Infrastructure.Data.IdentityEntities;
 using Template.Infrastructure.Jobs;

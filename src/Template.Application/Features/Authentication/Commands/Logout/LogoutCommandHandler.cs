@@ -1,11 +1,11 @@
 using MediatR;
 using Template.Application.Common.Responses;
 using Template.Application.Contracts.Services.Infrastructure;
-using Template.Domain.Abstracts.RepositoriesAbstracts;
+using Template.Domain.Contracts.Repositories;
 
 namespace Template.Application.Features.Authentication.Commands.Logout;
 
-public class LogoutCommandHandler : ResponseHandler, IRequestHandler<LogoutCommand, Result> {
+public class LogoutCommandHandler : ResultHandler, IRequestHandler<LogoutCommand, Result> {
     private readonly IAuthenticationService _authenticationService;
     private readonly IUnitOfWork _unitOfWork;
 

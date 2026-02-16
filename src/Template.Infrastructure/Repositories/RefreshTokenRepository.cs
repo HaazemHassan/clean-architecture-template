@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Template.Domain.Abstracts.RepositoriesAbstracts;
+using Template.Domain.Contracts.Repositories;
 using Template.Domain.Entities;
 using Template.Infrastructure.Data;
 

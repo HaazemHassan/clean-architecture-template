@@ -1,7 +1,7 @@
 ﻿using Template.Application.Enums;
 
 namespace Template.Application.Common.Responses {
-    public class ResponseHandler {
+    public class ResultHandler {
         public Result Success(string? message = null, object? meta = null) {
             return new Result() {
                 StatusCode = System.Net.HttpStatusCode.OK,

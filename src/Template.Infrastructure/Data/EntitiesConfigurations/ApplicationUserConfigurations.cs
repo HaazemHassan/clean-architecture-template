@@ -2,10 +2,12 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Template.Infrastructure.Data.IdentityEntities;
 
-namespace Template.Infrastructure.Data.EntitiesConfiguration {
-    internal class ApplicationUserConfigurations : IEntityTypeConfiguration<ApplicationUser> {
-        public void Configure(EntityTypeBuilder<ApplicationUser> builder) {
-            builder.ToTable("AspNetUsers", schema: "identity");
+namespace Template.Infrastructure.Data.EntitiesConfiguration
+{
+    internal class ApplicationUserConfigurations : IEntityTypeConfiguration<ApplicationUser>
+    {
+        public void Configure(EntityTypeBuilder<ApplicationUser> builder)
+        {
 
             builder.HasMany(u => u.RefreshTokens)
                    .WithOne()

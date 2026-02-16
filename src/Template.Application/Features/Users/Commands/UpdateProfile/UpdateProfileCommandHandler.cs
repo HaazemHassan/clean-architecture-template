@@ -2,11 +2,11 @@
 using MediatR;
 using Template.Application.Common.Responses;
 using Template.Application.Contracts.Services.Api;
-using Template.Domain.Abstracts.RepositoriesAbstracts;
+using Template.Domain.Contracts.Repositories;
 using Template.Domain.Entities;
 
 namespace Template.Application.Features.Users.Commands.UpdateProfile {
-    public class UpdateProfileCommandHandler : ResponseHandler, IRequestHandler<UpdateProfileCommand, Response<UpdateProfileCommandResponse>> {
+    public class UpdateProfileCommandHandler : ResultHandler, IRequestHandler<UpdateProfileCommand, Response<UpdateProfileCommandResponse>> {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ICurrentUserService _currentUserService;

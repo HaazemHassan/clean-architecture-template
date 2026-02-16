@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Template.API.Filters;
 using Template.Application.Common.Pagination;
 using Template.Application.Common.Responses;
+using Template.Application.Features.Authentication.Commands.SignIn;
 using Template.Application.Features.Authentication.Common;
 using Template.Application.Features.Users.Commands.AddUser;
 using Template.Application.Features.Users.Commands.Register;
@@ -12,12 +13,14 @@ using Template.Application.Features.Users.Queries.GetUserById;
 using Template.Application.Features.Users.Queries.GetUsersPaginated;
 using Template.Domain.Enums;
 
-namespace Template.API.Controllers {
+namespace Template.API.Controllers
+{
 
     /// <summary>
     /// User management controller for handling user operations
     /// </summary>
-    public class UserController : BaseController {
+    public class UserController : BaseController
+    {
 
 
         /// <summary>
@@ -35,8 +38,28 @@ namespace Template.API.Controllers {
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> Register([FromBody] RegisterCommand command) {
+        public async Task<IActionResult> Register([FromBody] RegisterCommand command)
+        {
             var result = await Mediator.Send(command);
+            if (result.Succeeded)
+            {
+                SignInCommand signInCommand = new SignInCommand
+                {
+                    Email = command.Email,
+                    Password = command.Password
+                };
+
+                var signInResult = await Mediator.Send(signInCommand);
+                if (signInResult.Succeeded)
+                {
+                    return CreatedAtAction(nameof(GetById), new { signInResult.Data!.User.Id }, result);
+                }
+                else
+                {
+                    // If sign-in fails after successful registration, return the registration result with a 201 status code
+                    return CreatedAtAction(nameof(GetById), new { Id = result.Data!.Id }, result);
+                }
+            }
             return NewResult(result);
         }
 
@@ -51,7 +74,8 @@ namespace Template.API.Controllers {
         [HttpGet]
         [ProducesResponseType(typeof(PaginatedResult<GetUsersPaginatedQueryResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetAll([FromQuery] GetUsersPaginatedQuery query) {
+        public async Task<IActionResult> GetAll([FromQuery] GetUsersPaginatedQuery query)
+        {
             var result = await Mediator.Send(query);
             return Ok(result);
         }
@@ -69,7 +93,8 @@ namespace Template.API.Controllers {
         [ProducesResponseType(typeof(Response<GetUserByIdQueryResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetById([FromRoute] GetUserByIdQuery query) {
+        public async Task<IActionResult> GetById([FromRoute] GetUserByIdQuery query)
+        {
             var result = await Mediator.Send(query);
             return NewResult(result);
         }
@@ -87,7 +112,8 @@ namespace Template.API.Controllers {
         [HttpGet("check-email/{Email}")]
         [ProducesResponseType(typeof(Response<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CheckEmailAvailability([FromRoute] CheckEmailAvailabilityQuery query) {
+        public async Task<IActionResult> CheckEmailAvailability([FromRoute] CheckEmailAvailabilityQuery query)
+        {
             var result = await Mediator.Send(query);
             return NewResult(result);
         }
@@ -95,7 +121,8 @@ namespace Template.API.Controllers {
 
         [HttpPost("add-user")]
         [Authorize(Roles = $"{nameof(UserRole.SuperAdmin)},{nameof(UserRole.Admin)}")]
-        public async Task<IActionResult> AddUser([FromBody] AddUserCommand command) {
+        public async Task<IActionResult> AddUser([FromBody] AddUserCommand command)
+        {
             var result = await Mediator.Send(command);
             if (result.Succeeded)
                 return CreatedAtAction(nameof(GetById), new { Id = result.Data!.Id }, result);
@@ -120,7 +147,8 @@ namespace Template.API.Controllers {
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileCommand command) {
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileCommand command)
+        {
             var result = await Mediator.Send(command);
             return NewResult(result);
         }

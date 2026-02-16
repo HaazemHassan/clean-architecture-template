@@ -2,11 +2,11 @@ using MediatR;
 using Template.Application.Common.Pagination;
 using Template.Application.Common.Responses;
 using Template.Application.Specifications.Users;
-using Template.Domain.Abstracts.RepositoriesAbstracts;
+using Template.Domain.Contracts.Repositories;
 using Template.Domain.Specifications.Users;
 
 namespace Template.Application.Features.Users.Queries.GetUsersPaginated {
-    public class GetUsersPaginatedQueryHandler : ResponseHandler, IRequestHandler<GetUsersPaginatedQuery, PaginatedResult<GetUsersPaginatedQueryResponse>> {
+    public class GetUsersPaginatedQueryHandler : ResultHandler, IRequestHandler<GetUsersPaginatedQuery, PaginatedResult<GetUsersPaginatedQueryResponse>> {
         private readonly IUnitOfWork _unitOfWork;
 
         public GetUsersPaginatedQueryHandler(IUnitOfWork unitOfWork) {

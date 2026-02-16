@@ -1,9 +1,9 @@
 using MediatR;
 using Template.Application.Common.Responses;
-using Template.Domain.Abstracts.RepositoriesAbstracts;
+using Template.Domain.Contracts.Repositories;
 
 namespace Template.Application.Features.Users.Queries.CheckEmailAvailability {
-    public class CheckEmailAvailabilityQueryHandler : ResponseHandler, IRequestHandler<CheckEmailAvailabilityQuery, Response<CheckEmailAvailabilityQueryResponse>> {
+    public class CheckEmailAvailabilityQueryHandler : ResultHandler, IRequestHandler<CheckEmailAvailabilityQuery, Response<CheckEmailAvailabilityQueryResponse>> {
         private readonly IUnitOfWork _unitOfWork;
 
         public CheckEmailAvailabilityQueryHandler(IUnitOfWork unitOfWork) {

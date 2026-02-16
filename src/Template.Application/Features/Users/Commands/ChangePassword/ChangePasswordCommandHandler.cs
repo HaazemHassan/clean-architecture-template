@@ -2,11 +2,11 @@
 using Template.Application.Common.Responses;
 using Template.Application.Contracts.Services.Api;
 using Template.Application.Contracts.Services.Infrastructure;
-using Template.Domain.Abstracts.RepositoriesAbstracts;
+using Template.Domain.Contracts.Repositories;
 
 namespace Template.Application.Features.Users.Commands.ChangePassword {
 
-    public class ChangePasswordCommandHandler : ResponseHandler, IRequestHandler<ChangePasswordCommand, Result> {
+    public class ChangePasswordCommandHandler : ResultHandler, IRequestHandler<ChangePasswordCommand, Result> {
 
 
         private readonly IUnitOfWork _unitOfWork;

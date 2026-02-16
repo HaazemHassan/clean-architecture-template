@@ -2,11 +2,11 @@ using MediatR;
 using Template.Application.Common.Responses;
 using Template.Application.Contracts.Services.Infrastructure;
 using Template.Application.Features.Authentication.Common;
-using Template.Domain.Abstracts.RepositoriesAbstracts;
+using Template.Domain.Contracts.Repositories;
 
 namespace Template.Application.Features.Authentication.Commands.SignIn;
 
-public class SignInCommandHandler : ResponseHandler, IRequestHandler<SignInCommand, Response<AuthResult>> {
+public class SignInCommandHandler : ResultHandler, IRequestHandler<SignInCommand, Response<AuthResult>> {
     private readonly IAuthenticationService _authenticationService;
     private readonly IUnitOfWork _unitOfWork;
 

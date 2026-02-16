@@ -3,8 +3,8 @@ using Template.Application.Features.Users.Common;
 using Template.Domain.Entities;
 
 namespace Template.Application.Features.Users.Queries.GetUsersPaginated {
-    public class UserResponseMappingProfile : Profile {
-        public UserResponseMappingProfile() {
+    public class GetUsersPaginatedQueryMappingProfile : Profile {
+        public GetUsersPaginatedQueryMappingProfile() {
             CreateMap<DomainUser, GetUsersPaginatedQueryResponse>()
            .IncludeBase<DomainUser, UserResponse>()
            .ForMember(dest => dest.Phone,
