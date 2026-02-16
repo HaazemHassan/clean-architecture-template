@@ -9,11 +9,13 @@ namespace Template.Application.Common.Responses
 
         public Result()
         {
+            Errors = new();
         }
         public Result(string message)
         {
             Succeeded = false;
             Message = message;
+            Errors = new();
         }
         public Result(string message, bool succeeded)
         {

@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 using Template.Domain.Contracts.Repositories;
-using Template.Domain.Contracts.Repositories;
 using Template.Infrastructure.Data;
 
 namespace Template.Infrastructure.Repositories;

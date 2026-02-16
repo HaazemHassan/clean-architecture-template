@@ -1,5 +1,9 @@
-﻿namespace Template.Domain.Enums {
-    public enum UserRole {
-        SuperAdmin, Admin, Worker, User
+﻿namespace Template.Domain.Enums
+{
+    public enum UserRole
+    {
+
+        User = 0,
+        Admin = 10
     }
 }

@@ -5,15 +5,20 @@ using Template.Application.Specifications.Users;
 using Template.Domain.Contracts.Repositories;
 using Template.Domain.Specifications.Users;
 
-namespace Template.Application.Features.Users.Queries.GetUsersPaginated {
-    public class GetUsersPaginatedQueryHandler : ResultHandler, IRequestHandler<GetUsersPaginatedQuery, PaginatedResult<GetUsersPaginatedQueryResponse>> {
+namespace Template.Application.Features.Users.Queries.GetUsersPaginated
+{
+    public class GetUsersPaginatedQueryHandler : ResultHandler, IRequestHandler<GetUsersPaginatedQuery, PaginatedResult<GetUsersPaginatedQueryResponse>>
+    {
         private readonly IUnitOfWork _unitOfWork;
 
-        public GetUsersPaginatedQueryHandler(IUnitOfWork unitOfWork) {
+        public GetUsersPaginatedQueryHandler(IUnitOfWork unitOfWork)
+        {
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<PaginatedResult<GetUsersPaginatedQueryResponse>> Handle(GetUsersPaginatedQuery request, CancellationToken cancellationToken) {
+        public async Task<PaginatedResult<GetUsersPaginatedQueryResponse>> Handle(GetUsersPaginatedQuery request, CancellationToken cancellationToken)
+        {
+
             var dataSpec = new UsersFilterPaginatedSpec(request.PageNumber, request.PageSize, request.Search, request.SortBy);
             var countSpec = new UsersFilterCountSpec(request.Search);
 

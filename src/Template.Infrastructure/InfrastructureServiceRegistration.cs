@@ -13,9 +13,11 @@ using Template.Infrastructure.Services;
 
 namespace Template.Infrastructure;
 
-public static class InfrastructureServiceRegistration {
+public static class InfrastructureServiceRegistration
+{
 
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration) {
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    {
 
         AddDbContextConfiguations(services, configuration);
         AddIdentityConfigurations(services, configuration);
@@ -27,21 +29,25 @@ public static class InfrastructureServiceRegistration {
     }
 
 
-    private static void AddDbContextConfiguations(IServiceCollection services, IConfiguration configuration) {
-        services.AddDbContext<AppDbContext>(options => {
+    private static void AddDbContextConfiguations(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddDbContext<AppDbContext>(options =>
+        {
             options.UseSqlServer(configuration["ConnectionStrings:DefaultConnection"]);
         });
 
     }
 
 
-    private static IServiceCollection AddIdentityConfigurations(IServiceCollection services, IConfiguration configuration) {
+    private static IServiceCollection AddIdentityConfigurations(IServiceCollection services, IConfiguration configuration)
+    {
 
         var passwordSettings = new PasswordSettings();
         configuration.GetSection(PasswordSettings.SectionName).Bind(passwordSettings);
         services.AddSingleton(passwordSettings);
 
-        services.AddIdentity<ApplicationUser, ApplicationRole>(option => {
+        services.AddIdentity<ApplicationUser, ApplicationRole>(option =>
+        {
             // Password settings 
             option.Password.RequireDigit = passwordSettings.RequireDigit;
             option.Password.RequireLowercase = passwordSettings.RequireLowercase;
@@ -70,7 +76,8 @@ public static class InfrastructureServiceRegistration {
 
 
 
-    private static IServiceCollection AddRepositories(IServiceCollection services) {
+    private static IServiceCollection AddRepositories(IServiceCollection services)
+    {
 
         // UnitOfWork should be Scoped to maintain consistency across a single request
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -84,16 +91,20 @@ public static class InfrastructureServiceRegistration {
         return services;
     }
 
-    private static IServiceCollection AddServices(IServiceCollection services) {
+    private static IServiceCollection AddServices(IServiceCollection services)
+    {
+        services.AddTransient<ISeederService, SeederService>();
         services.AddTransient<IApplicationUserService, ApplicationUserService>();
         services.AddTransient<IAuthenticationService, AuthenticationService>();
-        services.AddTransient<ISeederService, SeederService>();
+        services.AddScoped<IPermissionService, PermissionService>();
+
 
 
         return services;
     }
 
-    private static IServiceCollection AddBackgroundJobs(IServiceCollection services) {
+    private static IServiceCollection AddBackgroundJobs(IServiceCollection services)
+    {
         services.AddScoped<RefreshTokensCleanupJob>();
 
         return services;

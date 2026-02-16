@@ -2,11 +2,14 @@ using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
 using Template.Domain.Entities;
 
-namespace Template.Infrastructure.Data.IdentityEntities {
-    internal class ApplicationUser : IdentityUser<int> {
+namespace Template.Infrastructure.Data.IdentityEntities
+{
+    internal class ApplicationUser : IdentityUser<int>
+    {
 
 
-        public ApplicationUser(string email, string phoneNumber) {
+        public ApplicationUser(string email, string phoneNumber)
+        {
             UserName = email;
             Email = email;
             PhoneNumber = phoneNumber;
@@ -19,7 +22,8 @@ namespace Template.Infrastructure.Data.IdentityEntities {
         public virtual ICollection<RefreshToken> RefreshTokens { get; private set; } = new HashSet<RefreshToken>();
 
 
-        public void AssignDomainUser(DomainUser domainUser) {
+        public void AssignDomainUser(DomainUser domainUser)
+        {
             if (domainUser is null)
                 throw new ArgumentNullException("Domain user can't be null");
 
@@ -29,7 +33,10 @@ namespace Template.Infrastructure.Data.IdentityEntities {
             DomainUser = domainUser;
         }
 
-        public void ConfirmEmail() {
+        public void ConfirmEmail()
+        {
+            if (EmailConfirmed)
+                throw new InvalidOperationException("Email is already confirmed.");
             EmailConfirmed = true;
         }
     }

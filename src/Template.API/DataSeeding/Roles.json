@@ -1,6 +1,22 @@
 [
-  "SuperAdmin",
-  "Admin",
-  "Worker",
-  "User"
+  {
+    "Name": "SuperAdmin",
+    "Permissions": [
+      "UsersRead",
+      "UsersWrite",
+      "UsersDelete"
+    ]
+  },
+  {
+    "Name": "Admin",
+    "Permissions": [
+      "UsersRead",
+      "UsersWrite"
+    ]
+  }, 
+  {
+    "Name": "User",
+    "Permissions": []
+  }
 ]
+

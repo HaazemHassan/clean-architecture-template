@@ -11,7 +11,6 @@ using Template.Application.Features.Users.Commands.UpdateProfile;
 using Template.Application.Features.Users.Queries.CheckEmailAvailability;
 using Template.Application.Features.Users.Queries.GetUserById;
 using Template.Application.Features.Users.Queries.GetUsersPaginated;
-using Template.Domain.Enums;
 
 namespace Template.API.Controllers
 {
@@ -120,7 +119,7 @@ namespace Template.API.Controllers
 
 
         [HttpPost("add-user")]
-        [Authorize(Roles = $"{nameof(UserRole.SuperAdmin)},{nameof(UserRole.Admin)}")]
+        //[Authorize(Roles = $"{nameof(UserRole.SuperAdmin)},{nameof(UserRole.Admin)}")]
         public async Task<IActionResult> AddUser([FromBody] AddUserCommand command)
         {
             var result = await Mediator.Send(command);

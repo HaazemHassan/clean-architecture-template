@@ -2,21 +2,26 @@ using Serilog;
 using Template.API.Extentions;
 using Template.API.Middlewares;
 
-namespace Template.API {
-    public class Program {
-        public static async Task Main(string[] args) {
+namespace Template.API
+{
+    public class Program
+    {
+        public static async Task Main(string[] args)
+        {
             var builder = WebApplication.CreateBuilder(args);
 
 
             builder.Services.AddDependencies(builder.Configuration);
-            builder.Host.UseSerilog((hostingContext, configuration) => {
+            builder.Host.UseSerilog((hostingContext, configuration) =>
+            {
                 configuration.ReadFrom.Configuration(hostingContext.Configuration);
             });
 
 
             var app = builder.Build();
 
-            if (app.Environment.IsDevelopment()) {
+            if (app.Environment.IsDevelopment())
+            {
                 await app.InitializeDatabaseAsync();
 
                 app.UseSwagger();
@@ -38,7 +43,8 @@ namespace Template.API {
             app.UseAuthentication();
             app.UseAuthorization();
 
-            if (app.Environment.IsProduction()) {
+            if (app.Environment.IsProduction())
+            {
                 app.UseRateLimiter();
             }
 

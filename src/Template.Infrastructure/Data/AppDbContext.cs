@@ -5,17 +5,27 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Template.Application.Contracts.Services.Api;
 using Template.Domain.Common.Auditing;
+using Template.Domain.Entities;
 using Template.Infrastructure.Data.IdentityEntities;
 
-namespace Template.Infrastructure.Data {
-    internal class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int, IdentityUserClaim<int>, IdentityUserRole<int>, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>> {
+namespace Template.Infrastructure.Data
+{
+    internal class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int, IdentityUserClaim<int>, IdentityUserRole<int>, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>
+    {
         private readonly ICurrentUserService _currentUserService;
 
-        public AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserService currentUserService) : base(options) {
+
+        public virtual DbSet<RolePermission> RolePermissions { get; set; }
+        public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+
+
+        public AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserService currentUserService) : base(options)
+        {
             _currentUserService = currentUserService;
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder) {
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
@@ -23,8 +33,10 @@ namespace Template.Infrastructure.Data {
 
             #region query filters
             // Apply global query filter for soft-deleted entities
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes()) {
-                if (typeof(ISoftDeletableEntity).IsAssignableFrom(entityType.ClrType)) {
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                if (typeof(ISoftDeletableEntity).IsAssignableFrom(entityType.ClrType))
+                {
                     modelBuilder.Entity(entityType.ClrType).HasQueryFilter(GenerateIsDeletedFilter(entityType.ClrType));
                 }
             }
@@ -33,18 +45,22 @@ namespace Template.Infrastructure.Data {
 
 
         // Override SaveChangesAsync to automatically set audit properties  
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) {
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
             var userId = _currentUserService.UserId;
             var utcNow = DateTime.UtcNow;
 
-            foreach (var entry in ChangeTracker.Entries()) {
+            foreach (var entry in ChangeTracker.Entries())
+            {
 
-                if (entry.State == EntityState.Added) {
+                if (entry.State == EntityState.Added)
+                {
                     if (entry.Entity is IHasCreationTime cTime) cTime.CreatedAt = utcNow;
                     if (entry.Entity is IHasCreator cUser) cUser.CreatedBy = userId;
                 }
 
-                else if (entry.State == EntityState.Modified) {
+                else if (entry.State == EntityState.Modified)
+                {
                     if (entry.Entity is IHasModificationTime mTime) mTime.UpdatedAt = utcNow;
                     if (entry.Entity is IHasModifier mUser) mUser.UpdatedBy = userId;
 
@@ -54,11 +70,14 @@ namespace Template.Infrastructure.Data {
 
                 }
 
-                else if (entry.Entity is ISoftDeletableEntity softDelete && entry.State == EntityState.Deleted) {
-                    if (softDelete.IsDeleted) {
+                else if (entry.Entity is ISoftDeletableEntity softDelete && entry.State == EntityState.Deleted)
+                {
+                    if (softDelete.IsDeleted)
+                    {
                         entry.State = EntityState.Unchanged;
                     }
-                    else {
+                    else
+                    {
                         entry.State = EntityState.Modified;
                         softDelete.IsDeleted = true;
                         softDelete.DeletedAt = utcNow;
@@ -73,7 +92,8 @@ namespace Template.Infrastructure.Data {
         #region Helper Functions
 
         // Generates a lambda expression for the global query filter to exclude soft-deleted entities
-        private static LambdaExpression GenerateIsDeletedFilter(Type type) {
+        private static LambdaExpression GenerateIsDeletedFilter(Type type)
+        {
             var parameter = Expression.Parameter(type, "it");
             var property = Expression.Property(parameter, nameof(IFullyAuditableEntity.IsDeleted));
             var falseConstant = Expression.Constant(false);

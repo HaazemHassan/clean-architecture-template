@@ -5,7 +5,7 @@ using Template.Domain.Enums;
 
 namespace Template.Application.Features.Users.Commands.AddUser
 {
-    public class AddUserCommand : IRequest<Response<AddUserCommandResponse>>, ITransactionalRequest
+    public class AddUserCommand : IRequest<Response<AddUserCommandResponse>>, ITransactionalRequest, IAuthorizedRequest
     {
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
@@ -15,5 +15,7 @@ namespace Template.Application.Features.Users.Commands.AddUser
         public string? Address { get; set; }
         public string? PhoneNumber { get; set; }
         public UserRole UserRole { get; set; } = UserRole.User;
+
+        public IEnumerable<Permission> RequiredPermissions => [Permission.UsersWrite];
     }
 }

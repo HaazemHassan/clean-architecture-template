@@ -1,69 +1,170 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Data;
 using Template.Application.Contracts.Services.Infrastructure;
 using Template.Domain.Contracts.Repositories;
 using Template.Domain.Entities;
+using Template.Domain.Enums;
+using Template.Infrastructure.Data;
 using Template.Infrastructure.Data.IdentityEntities;
 using Template.Infrastructure.Data.Seeding;
 
-namespace Template.Infrastructure.Services {
-    internal class SeederService : ISeederService {
+namespace Template.Infrastructure.Services
+{
+    internal class SeederService : ISeederService
+    {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly AppDbContext _context;
         private readonly IUnitOfWork _unitOfWork;
 
-        public SeederService(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork, RoleManager<ApplicationRole> roleManager) {
+        public SeederService(
+            UserManager<ApplicationUser> userManager,
+            RoleManager<ApplicationRole> roleManager,
+            IUnitOfWork unitOfWork,
+            AppDbContext context)
+        {
             _userManager = userManager;
-            _unitOfWork = unitOfWork;
             _roleManager = roleManager;
+            _unitOfWork = unitOfWork;
+            _context = context;
         }
 
-        public async Task SeedRolesAsync(List<string> rolesSeedData, CancellationToken cancellationToken = default) {
-            bool haveRoles = await _roleManager.Roles.AnyAsync(cancellationToken);
-            if (haveRoles)
+        public async Task SeedRolesAsync(List<RoleSeedDto> rolesSeedData, CancellationToken cancellationToken = default)
+        {
+            if (rolesSeedData is null || rolesSeedData.Count == 0)
                 return;
 
-            if (rolesSeedData is null || rolesSeedData.Count <= 0)
-                return;
+            await using var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
-            var normalizedRoles = rolesSeedData.Where(r => !string.IsNullOrWhiteSpace(r))
-                                                 .Select(r => r.Trim())
-                                                 .Distinct(StringComparer.OrdinalIgnoreCase);
+            foreach (var roleData in rolesSeedData)
+            {
+                if (string.IsNullOrWhiteSpace(roleData.Name))
+                    continue;
 
-            foreach (var role in normalizedRoles) {
-                var roleInDb = await _roleManager.FindByNameAsync(role);
-                if (roleInDb is null) {
-                    roleInDb = new ApplicationRole(role);
-                    await _roleManager.CreateAsync(roleInDb);
+                var role = await _roleManager.FindByNameAsync(roleData.Name);
+
+                if (role is null)
+                {
+                    role = new ApplicationRole(roleData.Name);
+
+                    var createResult = await _roleManager.CreateAsync(role);
+
+                    if (!createResult.Succeeded)
+                        continue;
+                }
+
+                if (roleData.Permissions?.Count > 0)
+                {
+                    await SyncRolePermissionsAsync(
+                        role.Id,
+                        roleData.Permissions,
+                        cancellationToken);
                 }
             }
+
+
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
         }
 
-        public async Task SeedUsersAsync(List<UserSeedDto> usersSeedData, CancellationToken cancellationToken = default) {
-            bool haveUsers = await _unitOfWork.Users.AnyAsync(cancellationToken);
-            if (haveUsers)
-                return;
+        private async Task SyncRolePermissionsAsync(int roleId, List<string> permissionStrings, CancellationToken cancellationToken)
+        {
+            var validPermissions = new HashSet<Permission>();
+
+            foreach (var permissionString in permissionStrings)
+            {
+                if (Enum.TryParse<Permission>(permissionString, ignoreCase: true, out var parsedPermission))
+                {
+                    validPermissions.Add(parsedPermission);
+                }
+            }
 
 
+
+            var existingPermissions = await _context.Set<RolePermission>()
+                .Where(rp => rp.RoleId == roleId)
+                .Select(rp => rp.Permission)
+                .ToHashSetAsync(cancellationToken);
+
+            var permissionsToAdd = validPermissions
+                .Where(p => !existingPermissions.Contains(p))
+                .Select(p => new RolePermission
+                {
+                    RoleId = roleId,
+                    Permission = p
+                })
+                .ToList();
+
+            var permissionsToRemove = await _context.Set<RolePermission>()
+                .Where(rp => rp.RoleId == roleId && !validPermissions.Contains(rp.Permission))
+                .ToListAsync(cancellationToken);
+
+            if (permissionsToAdd.Count > 0)
+                await _context.Set<RolePermission>().AddRangeAsync(
+                    permissionsToAdd,
+                    cancellationToken);
+
+            if (permissionsToRemove.Count > 0)
+                _context.Set<RolePermission>().RemoveRange(permissionsToRemove);
+        }
+
+        public async Task SeedUsersAsync(
+            List<UserSeedDto> usersSeedData,
+            CancellationToken cancellationToken = default)
+        {
             if (usersSeedData is null || usersSeedData.Count == 0)
                 return;
 
-            foreach (var data in usersSeedData) {
+            await using var transaction =
+                await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
-                var domainUser = new DomainUser(data.FirstName, data.LastName, data.Email, data.PhoneNumber, data.Address);
+            foreach (var userData in usersSeedData)
+            {
+                if (string.IsNullOrWhiteSpace(userData.Email) ||
+                    string.IsNullOrWhiteSpace(userData.Password) ||
+                    string.IsNullOrWhiteSpace(userData.Role))
+                    continue;
 
-                var applicationUser = new ApplicationUser(data.Email, data.PhoneNumber);
+                var existingUser =
+                    await _userManager.FindByEmailAsync(userData.Email);
+
+                if (existingUser is not null)
+                    continue;
+
+                if (!await _roleManager.RoleExistsAsync(userData.Role))
+                    continue;
+
+                var domainUser = new DomainUser(
+                    userData.FirstName,
+                    userData.LastName,
+                    userData.Email,
+                    userData.PhoneNumber,
+                    userData.Address);
+
+                var applicationUser = new ApplicationUser(
+                    userData.Email,
+                    userData.PhoneNumber);
+
                 applicationUser.AssignDomainUser(domainUser);
                 applicationUser.ConfirmEmail();
 
+                var createResult = await _userManager.CreateAsync(
+                    applicationUser,
+                    userData.Password);
 
-                var result = await _userManager.CreateAsync(applicationUser, data.Password!);
+                if (!createResult.Succeeded)
+                    continue;
 
-                if (result.Succeeded) {
-                    await _userManager.AddToRoleAsync(applicationUser, data.Role!);
-                }
+                var roleResult = await _userManager
+                    .AddToRoleAsync(applicationUser, userData.Role);
+
+                if (!roleResult.Succeeded)
+                    continue;
             }
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
         }
     }
 }
