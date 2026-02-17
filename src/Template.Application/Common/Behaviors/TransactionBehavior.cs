@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
-using Template.Application.Contracts;
+using Template.Application.Contracts.Requests;
 using Template.Domain.Contracts.Repositories;
 
 namespace Template.Application.Common.Behaviors

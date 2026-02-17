@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Template.Application.Common.Responses;
-using Template.Application.Contracts;
+using Template.Application.Contracts.Requests;
 using Template.Application.Features.Users.Common;
 
 namespace Template.Application.Features.Users.Commands.Register

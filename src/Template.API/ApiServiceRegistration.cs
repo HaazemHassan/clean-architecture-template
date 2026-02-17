@@ -6,7 +6,6 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.RateLimiting;
-using Template.API.Authorization;
 using Template.API.Exceptions;
 using Template.API.Filters;
 using Template.API.RateLimiting;
@@ -44,7 +43,6 @@ namespace Template.API
             services.AddControllers();
             AddAuthenticationConfigurations(services, configuration);
             AddSwaggerConfigurations(services);
-            AddAutorizationConfigurations(services);
             AddRateLimitingConfigurations(services, configuration);
             AddHangfireConfiguration(services, configuration);
 
@@ -144,17 +142,6 @@ namespace Template.API
 
            }
         );
-
-            return services;
-        }
-        private static IServiceCollection AddAutorizationConfigurations(IServiceCollection services)
-        {
-            services.AddAuthorizationBuilder()
-                .AddPolicy(AuthorizationPolicies.ResetPassword, policy =>
-                {
-                    policy.RequireAuthenticatedUser();
-                    policy.RequireClaim("purpose", "reset-password");
-                });
 
             return services;
         }

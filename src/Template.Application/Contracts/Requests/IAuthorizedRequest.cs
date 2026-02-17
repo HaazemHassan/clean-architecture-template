@@ -1,4 +1,4 @@
-namespace Template.Application.Common.Security
+namespace Template.Application.Contracts.Requests
 {
     public interface IAuthorizedRequest
     {

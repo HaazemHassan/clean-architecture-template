@@ -1,4 +1,4 @@
-﻿namespace Template.Application.Contracts
+﻿namespace Template.Application.Contracts.Requests
 {
     internal interface ITransactionalRequest
     {

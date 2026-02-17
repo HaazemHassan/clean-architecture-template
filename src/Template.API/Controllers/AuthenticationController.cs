@@ -11,12 +11,14 @@ using Template.Application.Features.Authentication.Common;
 using Template.Application.Features.Users.Commands.ChangePassword;
 using Template.Infrastructure.Common.Options;
 
-namespace Template.API.Controllers {
+namespace Template.API.Controllers
+{
 
     /// <summary>
     /// Authentication controller for handling user login and token management
     /// </summary>
-    public class AuthenticationController(JwtSettings jwtSettings, IClientContextService clientContextService) : BaseController {
+    public class AuthenticationController(JwtSettings jwtSettings, IClientContextService clientContextService) : BaseController
+    {
         private readonly JwtSettings _jwtSettings = jwtSettings;
         private readonly IClientContextService _clientContextService = clientContextService;
 
@@ -40,7 +42,8 @@ namespace Template.API.Controllers {
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
-        public async Task<IActionResult> Login([FromBody] SignInCommand command) {
+        public async Task<IActionResult> Login([FromBody] SignInCommand command)
+        {
             var result = await Mediator.Send(command);
             HandleRefreshToken(result);
             return NewResult(result);
@@ -65,7 +68,8 @@ namespace Template.API.Controllers {
         [ProducesResponseType(typeof(Result<AuthResult>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command) {
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
+        {
             if (_clientContextService.IsWebClient())
                 command.RefreshToken = Request.Cookies["refreshToken"];
 
@@ -82,7 +86,8 @@ namespace Template.API.Controllers {
 
         [HttpPost("logout")]
         [Authorize]
-        public async Task<IActionResult> Logout([FromBody] LogoutCommand command) {
+        public async Task<IActionResult> Logout([FromBody] LogoutCommand command)
+        {
             if (_clientContextService.IsWebClient())
                 command.RefreshToken = Request.Cookies["refreshToken"];
 
@@ -98,7 +103,8 @@ namespace Template.API.Controllers {
 
         [HttpPost("change-password")]
         [Authorize]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command) {
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
+        {
             var result = await Mediator.Send(command);
             return NewResult(result);
         }
@@ -107,14 +113,17 @@ namespace Template.API.Controllers {
 
 
         //helpers
-        private void HandleRefreshToken(Result<AuthResult> result) {
+        private void HandleRefreshToken(Result<AuthResult> result)
+        {
             if (!result.Succeeded || result.Data?.RefreshToken is null)
                 return;
 
             var refreshToken = result.Data.RefreshToken.Token;
 
-            if (_clientContextService.IsWebClient()) {
-                var cookieOptions = new CookieOptions {
+            if (_clientContextService.IsWebClient())
+            {
+                var cookieOptions = new CookieOptions
+                {
                     HttpOnly = true,
                     Secure = true,
                     SameSite = SameSiteMode.None,
@@ -126,7 +135,6 @@ namespace Template.API.Controllers {
             }
         }
     }
-
 
 }
 

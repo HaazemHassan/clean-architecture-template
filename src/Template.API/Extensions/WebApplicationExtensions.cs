@@ -1,7 +1,6 @@
 ﻿using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using System.Text.Json;
-using Template.Application.Contracts.Services.Infrastructure;
 using Template.Infrastructure.Common.Options;
 using Template.Infrastructure.Data.Seeding;
 using Template.Infrastructure.Extensions;

@@ -7,8 +7,10 @@ using Template.Application.Contracts.Services.Infrastructure;
 using Template.Domain.Contracts.Repositories;
 using Template.Infrastructure.Data;
 using Template.Infrastructure.Data.IdentityEntities;
+using Template.Infrastructure.Data.Seeding;
 using Template.Infrastructure.Jobs;
 using Template.Infrastructure.Repositories;
+using Template.Infrastructure.Security;
 using Template.Infrastructure.Services;
 
 namespace Template.Infrastructure;
@@ -96,7 +98,6 @@ public static class InfrastructureServiceRegistration
         services.AddTransient<ISeederService, SeederService>();
         services.AddTransient<IApplicationUserService, ApplicationUserService>();
         services.AddTransient<IAuthenticationService, AuthenticationService>();
-        services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IPolicyEnforcer, PolicyEnforcer>();
         services.AddScoped<IAuthorizationService, AuthorizationService>();
 

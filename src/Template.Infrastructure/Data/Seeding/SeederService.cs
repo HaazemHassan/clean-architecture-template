@@ -1,14 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Template.Application.Contracts.Services.Infrastructure;
 using Template.Domain.Contracts.Repositories;
 using Template.Domain.Entities;
 using Template.Domain.Enums;
-using Template.Infrastructure.Data;
 using Template.Infrastructure.Data.IdentityEntities;
-using Template.Infrastructure.Data.Seeding;
 
-namespace Template.Infrastructure.Services
+namespace Template.Infrastructure.Data.Seeding
 {
     internal class SeederService : ISeederService
     {

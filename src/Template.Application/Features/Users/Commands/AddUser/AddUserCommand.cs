@@ -1,13 +1,12 @@
 ﻿using MediatR;
 using Template.Application.Common.Responses;
 using Template.Application.Common.Security;
-using Template.Application.Contracts;
+using Template.Application.Contracts.Requests;
 using Template.Domain.Enums;
 
 namespace Template.Application.Features.Users.Commands.AddUser
 {
-    [Authorize(Permissions = new[] { Permission.UsersWrite })]
-    [Authorize(Roles = new[] { UserRole.Admin })]
+    [Authorize(Permissions = [Permission.UsersWrite])]
     public class AddUserCommand : IRequest<Result<AddUserCommandResponse>>, ITransactionalRequest, IAuthorizedRequest
     {
         public string FirstName { get; set; } = string.Empty;

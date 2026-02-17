@@ -1,11 +1,10 @@
 using Template.Application.Common.Responses;
-using Template.Application.Common.Security;
 using Template.Application.Contracts.Services.Api;
 using Template.Application.Contracts.Services.Infrastructure;
 using Template.Application.Enums;
 using Template.Domain.Enums;
 
-namespace Template.Infrastructure.Services
+namespace Template.Infrastructure.Security
 {
     internal class AuthorizationService(ICurrentUserService _currentUserService, IPolicyEnforcer _policyEnforcer) : IAuthorizationService
     {

@@ -140,13 +140,15 @@ namespace Template.API.Controllers
         /// <response code="400">Invalid input data</response>
         /// <response code="401">User not authenticated</response>
         /// <response code="404">User not found</response>
-        [HttpPatch("profile")]
+        [HttpPatch("profile:{OwnerUserId:int}")]
+        [Authorize]
         [ProducesResponseType(typeof(Result<UpdateProfileCommandResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileCommand command)
+        public async Task<IActionResult> UpdateProfile([FromRoute] int OwnerUserId, [FromBody] UpdateProfileCommand command)
         {
+            command.OwnerUserId = OwnerUserId;
             var result = await Mediator.Send(command);
             return NewResult(result);
         }
