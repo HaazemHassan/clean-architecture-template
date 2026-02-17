@@ -3,14 +3,14 @@ using Template.Application.Common.Responses;
 using Template.Domain.Contracts.Repositories;
 
 namespace Template.Application.Features.Users.Queries.CheckEmailAvailability {
-    public class CheckEmailAvailabilityQueryHandler : ResultHandler, IRequestHandler<CheckEmailAvailabilityQuery, Response<CheckEmailAvailabilityQueryResponse>> {
+    public class CheckEmailAvailabilityQueryHandler : ResultHandler, IRequestHandler<CheckEmailAvailabilityQuery, Result<CheckEmailAvailabilityQueryResponse>> {
         private readonly IUnitOfWork _unitOfWork;
 
         public CheckEmailAvailabilityQueryHandler(IUnitOfWork unitOfWork) {
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Response<CheckEmailAvailabilityQueryResponse>> Handle(CheckEmailAvailabilityQuery request, CancellationToken cancellationToken) {
+        public async Task<Result<CheckEmailAvailabilityQueryResponse>> Handle(CheckEmailAvailabilityQuery request, CancellationToken cancellationToken) {
             var user = await _unitOfWork.Users.GetAsync(u => u.Email == request.Email, cancellationToken);
             var response = new CheckEmailAvailabilityQueryResponse {
                 IsAvailable = user is null

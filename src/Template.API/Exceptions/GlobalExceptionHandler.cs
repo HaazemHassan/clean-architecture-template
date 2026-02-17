@@ -22,7 +22,7 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
         var userId = httpContext.User?.Identity?.Name ?? "Anonymous";
         var isDevelopment = _environment.IsDevelopment();
 
-        var responseModel = new Response<string>
+        var responseModel = new Result<string>
         {
             Succeeded = false
         };

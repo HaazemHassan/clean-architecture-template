@@ -242,6 +242,16 @@ namespace Template.Infrastructure.Services
 
                 var roleClaims = await _roleManager.GetClaimsAsync(role);
                 claims.AddRange(roleClaims);
+
+                var permissions = await _dbContext.RolePermissions
+                    .Where(rp => rp.RoleId == role.Id)
+                    .Select(rp => rp.Permission)
+                    .ToListAsync();
+
+                foreach (var permission in permissions)
+                {
+                    claims.Add(new Claim("Permission", ((int)permission).ToString()));
+                }
             }
 
             return claims;

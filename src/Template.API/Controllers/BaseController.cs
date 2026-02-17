@@ -14,7 +14,7 @@ namespace Template.API.Controllers {
         protected IMediator Mediator => _mediatorInstance ??= HttpContext.RequestServices.GetService<IMediator>()!;
 
         #region Actions
-        protected ObjectResult NewResult<T>(Response<T> response) {
+        protected ObjectResult NewResult<T>(Result<T> response) {
             return response.StatusCode switch {
                 HttpStatusCode.OK => new OkObjectResult(response),
                 HttpStatusCode.Created => new CreatedResult(string.Empty, response),

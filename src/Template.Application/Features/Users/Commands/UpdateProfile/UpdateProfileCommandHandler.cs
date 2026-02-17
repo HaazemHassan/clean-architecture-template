@@ -5,23 +5,28 @@ using Template.Application.Contracts.Services.Api;
 using Template.Domain.Contracts.Repositories;
 using Template.Domain.Entities;
 
-namespace Template.Application.Features.Users.Commands.UpdateProfile {
-    public class UpdateProfileCommandHandler : ResultHandler, IRequestHandler<UpdateProfileCommand, Response<UpdateProfileCommandResponse>> {
+namespace Template.Application.Features.Users.Commands.UpdateProfile
+{
+    public class UpdateProfileCommandHandler : ResultHandler, IRequestHandler<UpdateProfileCommand, Result<UpdateProfileCommandResponse>>
+    {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ICurrentUserService _currentUserService;
 
-        public UpdateProfileCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService) {
+        public UpdateProfileCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
+        {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _currentUserService = currentUserService;
-
         }
 
-        public async Task<Response<UpdateProfileCommandResponse>> Handle(UpdateProfileCommand request, CancellationToken cancellationToken) {
-            var userId = _currentUserService.UserId;
+        public async Task<Result<UpdateProfileCommandResponse>> Handle(UpdateProfileCommand request, CancellationToken cancellationToken)
+        {
+            // Set UserId from current user if not provided (for backward compatibility)
+            if (request.OwnerUserId == 0)
+                request.OwnerUserId = _currentUserService.UserId!.Value;
 
-            var userFromDb = await _unitOfWork.Users.GetByIdAsync(userId!.Value, cancellationToken);
+            var userFromDb = await _unitOfWork.Users.GetByIdAsync(request.OwnerUserId, cancellationToken);
             if (userFromDb is null)
                 return NotFound<UpdateProfileCommandResponse>("User not found");
 
@@ -38,7 +43,6 @@ namespace Template.Application.Features.Users.Commands.UpdateProfile {
             var userResponse = _mapper.Map<DomainUser, UpdateProfileCommandResponse>(userFromDb);
             return Updated(userResponse);
         }
-
     }
 }
 

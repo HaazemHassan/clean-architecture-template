@@ -33,7 +33,7 @@ namespace Template.API.Controllers
         /// <response code="403">User is already authenticated (anonymous only endpoint)</response>
         [HttpPost("register")]
         [AnonymousOnly]
-        [ProducesResponseType(typeof(Response<AuthResult>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(Result<AuthResult>), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -89,7 +89,7 @@ namespace Template.API.Controllers
         /// <response code="400">Invalid user ID format</response>
         [HttpGet("{Id:int}")]
         [Authorize]
-        [ProducesResponseType(typeof(Response<GetUserByIdQueryResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<GetUserByIdQueryResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetById([FromRoute] GetUserByIdQuery query)
@@ -109,7 +109,7 @@ namespace Template.API.Controllers
         /// <response code="200">Returns true if email is available, false otherwise</response>
         /// <response code="400">Invalid email format</response>
         [HttpGet("check-email/{Email}")]
-        [ProducesResponseType(typeof(Response<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CheckEmailAvailability([FromRoute] CheckEmailAvailabilityQuery query)
         {
@@ -141,8 +141,7 @@ namespace Template.API.Controllers
         /// <response code="401">User not authenticated</response>
         /// <response code="404">User not found</response>
         [HttpPatch("profile")]
-        [Authorize]
-        [ProducesResponseType(typeof(Response<UpdateProfileCommandResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<UpdateProfileCommandResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

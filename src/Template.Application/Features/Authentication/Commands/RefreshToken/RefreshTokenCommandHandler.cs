@@ -6,7 +6,7 @@ using Template.Domain.Contracts.Repositories;
 
 namespace Template.Application.Features.Authentication.Commands.RefreshToken;
 
-public class RefreshTokenCommandHandler : ResultHandler, IRequestHandler<RefreshTokenCommand, Response<AuthResult>> {
+public class RefreshTokenCommandHandler : ResultHandler, IRequestHandler<RefreshTokenCommand, Result<AuthResult>> {
     private readonly IAuthenticationService _authenticationService;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -15,7 +15,7 @@ public class RefreshTokenCommandHandler : ResultHandler, IRequestHandler<Refresh
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Response<AuthResult>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken) {
+    public async Task<Result<AuthResult>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken) {
         var authResult = await _authenticationService.ReAuthenticateAsync(request.RefreshToken!, request.AccessToken);
         if (authResult.Succeeded)
             await _unitOfWork.SaveChangesAsync(cancellationToken);

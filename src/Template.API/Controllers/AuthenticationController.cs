@@ -36,7 +36,7 @@ namespace Template.API.Controllers {
         [HttpPost("login")]
         [AnonymousOnly]
         [EnableRateLimiting("loginLimiter")]
-        [ProducesResponseType(typeof(Response<AuthResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<AuthResult>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
@@ -62,7 +62,7 @@ namespace Template.API.Controllers {
         /// The access token in the request body can be expired, but must be valid in format.
         /// </remarks>
         [HttpPost("refresh-token")]
-        [ProducesResponseType(typeof(Response<AuthResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<AuthResult>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command) {
@@ -107,7 +107,7 @@ namespace Template.API.Controllers {
 
 
         //helpers
-        private void HandleRefreshToken(Response<AuthResult> result) {
+        private void HandleRefreshToken(Result<AuthResult> result) {
             if (!result.Succeeded || result.Data?.RefreshToken is null)
                 return;
 

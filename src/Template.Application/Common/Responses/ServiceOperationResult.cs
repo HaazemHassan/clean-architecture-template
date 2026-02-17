@@ -2,7 +2,8 @@ using Template.Application.Enums;
 
 namespace Template.Application.Common.Responses;
 
-public class ServiceOperationResult {
+public class ServiceOperationResult
+{
     public ServiceOperationStatus Status { get; }
     public string Message { get; }
     public string? ErrorCode { get; }
@@ -14,7 +15,8 @@ public class ServiceOperationResult {
         ServiceOperationStatus status,
         string? message = null,
         string? errorCode = null,
-        object? meta = null) {
+        object? meta = null)
+    {
         if (IsSuccessStatus(status) && !string.IsNullOrEmpty(errorCode))
             throw new ArgumentException(
                 "Success result cannot have an ErrorCode.",
@@ -29,7 +31,8 @@ public class ServiceOperationResult {
     public static ServiceOperationResult Success(
         ServiceOperationStatus status = ServiceOperationStatus.Succeeded,
         string? message = null,
-        object? meta = null) {
+        object? meta = null)
+    {
         if (!IsSuccessStatus(status))
             throw new ArgumentException(
                 "Success method can only be called with success status.",
@@ -42,7 +45,8 @@ public class ServiceOperationResult {
         ServiceOperationStatus status,
         string? message = null,
         string? errorCode = null,
-        object? meta = null) {
+        object? meta = null)
+    {
         if (IsSuccessStatus(status))
             throw new ArgumentException(
                 "Failure method cannot be called with success status.",
@@ -57,7 +61,8 @@ public class ServiceOperationResult {
         status == ServiceOperationStatus.Updated ||
         status == ServiceOperationStatus.Deleted;
 
-    private static string GetDefaultMessage(ServiceOperationStatus status) => status switch {
+    private static string GetDefaultMessage(ServiceOperationStatus status) => status switch
+    {
         ServiceOperationStatus.Succeeded => "Operation completed successfully.",
         ServiceOperationStatus.Created => "Resource created successfully.",
         ServiceOperationStatus.Updated => "Resource updated successfully.",
@@ -72,7 +77,8 @@ public class ServiceOperationResult {
 
 }
 
-public sealed class ServiceOperationResult<T> : ServiceOperationResult {
+public sealed class ServiceOperationResult<T> : ServiceOperationResult
+{
     public T Data { get; }
 
     private ServiceOperationResult(
@@ -81,7 +87,8 @@ public sealed class ServiceOperationResult<T> : ServiceOperationResult {
         string? message = null,
         string? errorCode = null,
         object? meta = null)
-        : base(status, message, errorCode, meta) {
+        : base(status, message, errorCode, meta)
+    {
         Data = data;
     }
 
@@ -89,7 +96,8 @@ public sealed class ServiceOperationResult<T> : ServiceOperationResult {
         T data,
         ServiceOperationStatus status = ServiceOperationStatus.Succeeded,
         string? message = null,
-        object? meta = null) {
+        object? meta = null)
+    {
         if (data is null)
             throw new ArgumentNullException(nameof(data));
 
@@ -102,10 +110,11 @@ public sealed class ServiceOperationResult<T> : ServiceOperationResult {
     }
 
     public new static ServiceOperationResult<T> Failure(
-        ServiceOperationStatus status,
+        ServiceOperationStatus status = ServiceOperationStatus.Failed,
         string? message = null,
         string? errorCode = null,
-        object? meta = null) {
+        object? meta = null)
+    {
         if (IsSuccessStatus(status))
             throw new ArgumentException(
                 "Failure method cannot be called with success status.",

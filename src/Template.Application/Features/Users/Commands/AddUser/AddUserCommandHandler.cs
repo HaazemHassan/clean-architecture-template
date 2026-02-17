@@ -7,7 +7,7 @@ using Template.Domain.Entities;
 
 namespace Template.Application.Features.Users.Commands.AddUser
 {
-    public class AddUserCommandHandler : ResultHandler, IRequestHandler<AddUserCommand, Response<AddUserCommandResponse>>
+    public class AddUserCommandHandler : ResultHandler, IRequestHandler<AddUserCommand, Result<AddUserCommandResponse>>
     {
 
         private readonly IUnitOfWork _unitOfWork;
@@ -21,7 +21,7 @@ namespace Template.Application.Features.Users.Commands.AddUser
             _applicationUserService = applicationUserService;
         }
 
-        public async Task<Response<AddUserCommandResponse>> Handle(AddUserCommand request, CancellationToken cancellationToken)
+        public async Task<Result<AddUserCommandResponse>> Handle(AddUserCommand request, CancellationToken cancellationToken)
         {
             var domainUser = new DomainUser(request.FirstName, request.LastName, request.Email, request.PhoneNumber, request.Address);
             var addUserResult = await _applicationUserService.AddUser(domainUser, request.Password, request.UserRole, cancellationToken);

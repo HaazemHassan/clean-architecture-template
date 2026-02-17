@@ -1,11 +1,14 @@
 ﻿using MediatR;
 using Template.Application.Common.Responses;
+using Template.Application.Common.Security;
 using Template.Application.Contracts;
 using Template.Domain.Enums;
 
 namespace Template.Application.Features.Users.Commands.AddUser
 {
-    public class AddUserCommand : IRequest<Response<AddUserCommandResponse>>, ITransactionalRequest, IAuthorizedRequest
+    [Authorize(Permissions = new[] { Permission.UsersWrite })]
+    [Authorize(Roles = new[] { UserRole.Admin })]
+    public class AddUserCommand : IRequest<Result<AddUserCommandResponse>>, ITransactionalRequest, IAuthorizedRequest
     {
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
@@ -16,6 +19,5 @@ namespace Template.Application.Features.Users.Commands.AddUser
         public string? PhoneNumber { get; set; }
         public UserRole UserRole { get; set; } = UserRole.User;
 
-        public IEnumerable<Permission> RequiredPermissions => [Permission.UsersWrite];
     }
 }

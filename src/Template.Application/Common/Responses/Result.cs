@@ -32,12 +32,12 @@ namespace Template.Application.Common.Responses
         public string? ErrorCode { get; set; }
 
     }
-    public class Response<T> : Result
+    public class Result<T> : Result
     {
-        public Response() : base()
+        public Result() : base()
         {
         }
-        public Response(T data, string message)
+        public Result(T data, string message)
         {
             Succeeded = true;
             Message = message;

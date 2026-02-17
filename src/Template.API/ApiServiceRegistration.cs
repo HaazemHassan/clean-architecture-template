@@ -7,7 +7,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.RateLimiting;
 using Template.API.Authorization;
-using Template.API.Authorization.Requirements;
 using Template.API.Exceptions;
 using Template.API.Filters;
 using Template.API.RateLimiting;
@@ -21,11 +20,14 @@ using Template.Infrastructure.Common.Options;
 
 
 
-namespace Template.API {
-    public static class ApiServiceRegistration {
+namespace Template.API
+{
+    public static class ApiServiceRegistration
+    {
         private const string GuestIdKey = "GuestId";   // used for ratelimiting
 
-        public static IServiceCollection AddDependencies(this IServiceCollection services, IConfiguration configuration) {
+        public static IServiceCollection AddDependencies(this IServiceCollection services, IConfiguration configuration)
+        {
             services.AddApplication();
             services.AddInfrastructure(configuration);
             AddApi(services, configuration);
@@ -37,7 +39,8 @@ namespace Template.API {
         }
 
 
-        private static IServiceCollection AddApi(IServiceCollection services, IConfiguration configuration) {
+        private static IServiceCollection AddApi(IServiceCollection services, IConfiguration configuration)
+        {
             services.AddControllers();
             AddAuthenticationConfigurations(services, configuration);
             AddSwaggerConfigurations(services);
@@ -59,11 +62,14 @@ namespace Template.API {
 
 
 
-        private static IServiceCollection AddSwaggerConfigurations(IServiceCollection services) {
+        private static IServiceCollection AddSwaggerConfigurations(IServiceCollection services)
+        {
             // Swagger Configuration
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen(options => {
-                options.SwaggerDoc("v1", new OpenApiInfo {
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
                     Title = "Template API",
                     Version = "v1",
                     Description = "API for Template application"
@@ -74,11 +80,13 @@ namespace Template.API {
 
                 var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                if (File.Exists(xmlPath)) {
+                if (File.Exists(xmlPath))
+                {
                     options.IncludeXmlComments(xmlPath);
                 }
 
-                options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme {
+                options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+                {
                     Description = "JWT Authorization header using the Bearer scheme (Example: 'Bearer 12345abcdef')",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
@@ -103,7 +111,8 @@ namespace Template.API {
         }
 
 
-        private static IServiceCollection AddAuthenticationConfigurations(IServiceCollection services, IConfiguration configuration) {
+        private static IServiceCollection AddAuthenticationConfigurations(IServiceCollection services, IConfiguration configuration)
+        {
             //JWT Authentication
             var jwtSettings = new JwtSettings();
             configuration.GetSection(JwtSettings.SectionName).Bind(jwtSettings);
@@ -111,14 +120,17 @@ namespace Template.API {
 
 
 
-            services.AddAuthentication(x => {
+            services.AddAuthentication(x =>
+            {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-           .AddJwtBearer(x => {
+           .AddJwtBearer(x =>
+           {
                x.RequireHttpsMetadata = false;
                x.SaveToken = true;
-               x.TokenValidationParameters = new TokenValidationParameters {
+               x.TokenValidationParameters = new TokenValidationParameters
+               {
                    ValidateIssuer = jwtSettings.ValidateIssuer,
                    ValidIssuer = jwtSettings.Issuer,
                    ValidateIssuerSigningKey = jwtSettings.ValidateIssuerSigningKey,
@@ -135,28 +147,30 @@ namespace Template.API {
 
             return services;
         }
-        private static IServiceCollection AddAutorizationConfigurations(IServiceCollection services) {
+        private static IServiceCollection AddAutorizationConfigurations(IServiceCollection services)
+        {
             services.AddAuthorizationBuilder()
-                .AddPolicy(AuthorizationPolicies.ResetPassword, policy => {
+                .AddPolicy(AuthorizationPolicies.ResetPassword, policy =>
+                {
                     policy.RequireAuthenticatedUser();
                     policy.RequireClaim("purpose", "reset-password");
-                })
-                .AddPolicy(AuthorizationPolicies.SameUserOrAdmin, policy => {
-                    policy.RequireAuthenticatedUser();
-                    policy.AddRequirements(new SameUserOrAdminRequirement());
                 });
+
             return services;
         }
 
         public static IServiceCollection AddRateLimitingConfigurations(
-         this IServiceCollection services, IConfiguration configuration) {
+         this IServiceCollection services, IConfiguration configuration)
+        {
 
             var rateLimitingSettings = new RateLimitingSettings();
             configuration.GetSection(RateLimitingSettings.SectionName).Bind(rateLimitingSettings);
             services.AddSingleton(rateLimitingSettings);
 
-            services.AddRateLimiter(options => {
-                options.AddPolicy(RateLimitingPolicies.DefaultLimiter, httpContext => {
+            services.AddRateLimiter(options =>
+            {
+                options.AddPolicy(RateLimitingPolicies.DefaultLimiter, httpContext =>
+                {
                     string partitionKey;
                     var user = httpContext.User?.Identity?.Name;
 
@@ -170,7 +184,8 @@ namespace Template.API {
                         partitionKey = GetFallbackPartitionKey(httpContext);
 
 
-                    return RateLimitPartition.GetSlidingWindowLimiter(partitionKey, key => new SlidingWindowRateLimiterOptions {
+                    return RateLimitPartition.GetSlidingWindowLimiter(partitionKey, key => new SlidingWindowRateLimiterOptions
+                    {
                         Window = TimeSpan.FromMinutes(rateLimitingSettings.DefaultLimiter.WindowMinutes),
                         PermitLimit = rateLimitingSettings.DefaultLimiter.PermitLimit,
                         QueueLimit = rateLimitingSettings.DefaultLimiter.QueueLimit,
@@ -179,7 +194,8 @@ namespace Template.API {
                     });
                 });
 
-                options.AddPolicy(RateLimitingPolicies.LoginLimiter, httpContext => {
+                options.AddPolicy(RateLimitingPolicies.LoginLimiter, httpContext =>
+                {
                     string partitionKey;
 
                     if (httpContext.Items.TryGetValue(GuestIdKey, out var guestId) && guestId is string guestIdString)
@@ -189,7 +205,8 @@ namespace Template.API {
                         partitionKey = GetFallbackPartitionKey(httpContext);
 
 
-                    return RateLimitPartition.GetSlidingWindowLimiter(partitionKey, key => new SlidingWindowRateLimiterOptions {
+                    return RateLimitPartition.GetSlidingWindowLimiter(partitionKey, key => new SlidingWindowRateLimiterOptions
+                    {
                         Window = TimeSpan.FromMinutes(rateLimitingSettings.LoginLimiter.WindowMinutes),
                         PermitLimit = rateLimitingSettings.LoginLimiter.PermitLimit,
                         QueueLimit = rateLimitingSettings.LoginLimiter.QueueLimit,
@@ -198,8 +215,10 @@ namespace Template.API {
                     });
                 });
 
-                options.OnRejected = async (context, token) => {
-                    if (context.HttpContext.Response.HasStarted) {
+                options.OnRejected = async (context, token) =>
+                {
+                    if (context.HttpContext.Response.HasStarted)
+                    {
                         return;
                     }
 
@@ -207,12 +226,14 @@ namespace Template.API {
                     context.HttpContext.Response.ContentType = "application/json";
 
                     int retryAfterSeconds = rateLimitingSettings.RetryAfterSeconds;
-                    if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter)) {
+                    if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+                    {
                         retryAfterSeconds = (int)Math.Ceiling(retryAfter.TotalSeconds);
                     }
                     context.HttpContext.Response.Headers.RetryAfter = retryAfterSeconds.ToString();
 
-                    var response = new Response<string> {
+                    var response = new Result<string>
+                    {
                         StatusCode = HttpStatusCode.TooManyRequests,
                         Message = "Too many requests. Please try again later.",
                         Succeeded = false
@@ -226,7 +247,8 @@ namespace Template.API {
 
             return services;
 
-            static string GetFallbackPartitionKey(HttpContext httpContext) {
+            static string GetFallbackPartitionKey(HttpContext httpContext)
+            {
                 var clientContextService = httpContext.RequestServices.GetRequiredService<IClientContextService>();
                 var ip = clientContextService.GetClientIpAddress();
                 var userAgent = httpContext.Request.Headers.UserAgent;
@@ -238,7 +260,8 @@ namespace Template.API {
             }
         }
 
-        private static IServiceCollection AddHangfireConfiguration(IServiceCollection services, IConfiguration configuration) {
+        private static IServiceCollection AddHangfireConfiguration(IServiceCollection services, IConfiguration configuration)
+        {
 
             var hangfireSettings = new HangfireSettings();
             configuration.GetSection(HangfireSettings.SectionName).Bind(hangfireSettings);

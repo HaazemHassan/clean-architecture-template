@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Template.Application.Contracts;
 using Template.Domain.Contracts.Repositories;
 
-namespace Template.Application.Behaviors
+namespace Template.Application.Common.Behaviors
 {
     public class TransactionBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>

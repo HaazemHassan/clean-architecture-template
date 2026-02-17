@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
-namespace Template.Application.Behaviors
+namespace Template.Application.Common.Behaviors
 {
     public class LoggingBehavior<TRequest, TResponse>
         : IPipelineBehavior<TRequest, TResponse>

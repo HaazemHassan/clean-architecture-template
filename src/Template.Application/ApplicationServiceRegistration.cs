@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using Template.Application.Behaviors;
+using Template.Application.Common.Behaviors;
 
 namespace Template.Application
 {

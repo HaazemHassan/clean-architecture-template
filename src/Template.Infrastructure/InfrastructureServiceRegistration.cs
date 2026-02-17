@@ -97,6 +97,8 @@ public static class InfrastructureServiceRegistration
         services.AddTransient<IApplicationUserService, ApplicationUserService>();
         services.AddTransient<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IPermissionService, PermissionService>();
+        services.AddScoped<IPolicyEnforcer, PolicyEnforcer>();
+        services.AddScoped<IAuthorizationService, AuthorizationService>();
 
 
 

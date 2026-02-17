@@ -6,7 +6,7 @@ using Template.Domain.Contracts.Repositories;
 
 namespace Template.Application.Features.Users.Queries.GetUserById
 {
-    public class GetUserByIdQueryHandler : ResultHandler, IRequestHandler<GetUserByIdQuery, Response<GetUserByIdQueryResponse>>
+    public class GetUserByIdQueryHandler : ResultHandler, IRequestHandler<GetUserByIdQuery, Result<GetUserByIdQueryResponse>>
     {
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
@@ -17,7 +17,7 @@ namespace Template.Application.Features.Users.Queries.GetUserById
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Response<GetUserByIdQueryResponse>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<GetUserByIdQueryResponse>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
         {
             var spec = new UserDetailsProjectionSpec(request.Id);
             var user = await _unitOfWork.Users.FirstOrDefaultAsync(spec);

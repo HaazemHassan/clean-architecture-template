@@ -6,7 +6,7 @@ using Template.Domain.Contracts.Repositories;
 
 namespace Template.Application.Features.Authentication.Commands.SignIn;
 
-public class SignInCommandHandler : ResultHandler, IRequestHandler<SignInCommand, Response<AuthResult>> {
+public class SignInCommandHandler : ResultHandler, IRequestHandler<SignInCommand, Result<AuthResult>> {
     private readonly IAuthenticationService _authenticationService;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -15,7 +15,7 @@ public class SignInCommandHandler : ResultHandler, IRequestHandler<SignInCommand
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<Response<AuthResult>> Handle(SignInCommand request, CancellationToken cancellationToken) {
+    public async Task<Result<AuthResult>> Handle(SignInCommand request, CancellationToken cancellationToken) {
         var authResult = await _authenticationService.SignInWithPassword(request.Email, request.Password);
         if (authResult.Succeeded)
             await _unitOfWork.SaveChangesAsync(cancellationToken);

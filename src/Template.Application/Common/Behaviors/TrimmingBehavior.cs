@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Template.Application.Extensions;
 
-namespace Template.Application.Behaviors
+namespace Template.Application.Common.Behaviors
 {
     public class TrimmingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
          where TRequest : notnull, IRequest<TResponse>

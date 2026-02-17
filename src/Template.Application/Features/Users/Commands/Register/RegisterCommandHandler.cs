@@ -8,7 +8,7 @@ using Template.Domain.Entities;
 
 namespace Template.Application.Features.Users.Commands.Register
 {
-    public class RegisterCommandHandler : ResultHandler, IRequestHandler<RegisterCommand, Response<UserResponse>>
+    public class RegisterCommandHandler : ResultHandler, IRequestHandler<RegisterCommand, Result<UserResponse>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -23,7 +23,7 @@ namespace Template.Application.Features.Users.Commands.Register
             _authenticationService = authenticationService;
         }
 
-        public async Task<Response<UserResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
+        public async Task<Result<UserResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
             var userToAdd = new DomainUser(request.FirstName, request.LastName, request.Email, request.PhoneNumber, request.Address);
 
