@@ -8,7 +8,6 @@ using Template.Application.Features.Authentication.Commands.Logout;
 using Template.Application.Features.Authentication.Commands.RefreshToken;
 using Template.Application.Features.Authentication.Commands.SignIn;
 using Template.Application.Features.Authentication.Common;
-using Template.Application.Features.Users.Commands.ChangePassword;
 using Template.Infrastructure.Common.Options;
 
 namespace Template.API.Controllers
@@ -100,17 +99,6 @@ namespace Template.API.Controllers
 
             return NewResult(result);
         }
-
-        [HttpPost("change-password")]
-        [Authorize]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
-        {
-            var result = await Mediator.Send(command);
-            return NewResult(result);
-        }
-
-
-
 
         //helpers
         private void HandleRefreshToken(Result<AuthResult> result)

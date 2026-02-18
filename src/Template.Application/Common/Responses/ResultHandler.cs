@@ -1,9 +1,13 @@
 ﻿using Template.Application.Enums;
 
-namespace Template.Application.Common.Responses {
-    public class ResultHandler {
-        public Result Success(string? message = null, object? meta = null) {
-            return new Result() {
+namespace Template.Application.Common.Responses
+{
+    public class ResultHandler
+    {
+        public Result Success(string? message = null, object? meta = null)
+        {
+            return new Result()
+            {
                 StatusCode = System.Net.HttpStatusCode.OK,
                 Succeeded = true,
                 Message = message ?? "Operation Succeeded",
@@ -11,8 +15,10 @@ namespace Template.Application.Common.Responses {
             };
         }
 
-        public Result<T> Success<T>(T entity, string? message = null, object? meta = null) {
-            return new Result<T>() {
+        public Result<T> Success<T>(T entity, string? message = null, object? meta = null)
+        {
+            return new Result<T>()
+            {
                 Data = entity,
                 StatusCode = System.Net.HttpStatusCode.OK,
                 Succeeded = true,
@@ -21,8 +27,10 @@ namespace Template.Application.Common.Responses {
             };
         }
 
-        public Result Created(string? message = null, object? meta = null) {
-            return new Result() {
+        public Result Created(string? message = null, object? meta = null)
+        {
+            return new Result()
+            {
                 StatusCode = System.Net.HttpStatusCode.Created,
                 Succeeded = true,
                 Message = message ?? "Created Successfully",
@@ -30,8 +38,10 @@ namespace Template.Application.Common.Responses {
             };
         }
 
-        public Result<T> Created<T>(T entity, string? message = null, object? meta = null) {
-            return new Result<T>() {
+        public Result<T> Created<T>(T entity, string? message = null, object? meta = null)
+        {
+            return new Result<T>()
+            {
                 Data = entity,
                 StatusCode = System.Net.HttpStatusCode.Created,
                 Succeeded = true,
@@ -42,8 +52,10 @@ namespace Template.Application.Common.Responses {
 
 
 
-        public Result Updated(string? message = null, object? meta = null) {
-            return new Result() {
+        public Result Updated(string? message = null, object? meta = null)
+        {
+            return new Result()
+            {
                 StatusCode = System.Net.HttpStatusCode.OK,
                 Succeeded = true,
                 Message = message ?? "Updated Successfully",
@@ -51,8 +63,10 @@ namespace Template.Application.Common.Responses {
             };
         }
 
-        public Result<T> Updated<T>(T entity, string? message = null, object? meta = null) {
-            return new Result<T>() {
+        public Result<T> Updated<T>(T entity, string? message = null, object? meta = null)
+        {
+            return new Result<T>()
+            {
                 Data = entity,
                 StatusCode = System.Net.HttpStatusCode.OK,
                 Succeeded = true,
@@ -62,9 +76,11 @@ namespace Template.Application.Common.Responses {
         }
 
 
-        public Result Deleted(string? message = null, object? meta = null) {
+        public Result Deleted(string? message = null, object? meta = null)
+        {
 
-            return new Result() {
+            return new Result()
+            {
                 StatusCode = System.Net.HttpStatusCode.OK,
                 Succeeded = true,
                 Message = message ?? "Deleted Successfully",
@@ -72,9 +88,11 @@ namespace Template.Application.Common.Responses {
 
             };
         }
-        public Result<T> Deleted<T>(T entity, string? message = null, object? meta = null) {
+        public Result<T> Deleted<T>(T entity, string? message = null, object? meta = null)
+        {
 
-            return new Result<T>() {
+            return new Result<T>()
+            {
                 Data = entity,
                 StatusCode = System.Net.HttpStatusCode.OK,
                 Succeeded = true,
@@ -86,8 +104,10 @@ namespace Template.Application.Common.Responses {
 
 
 
-        public Result<T> Unauthorized<T>(string? message = null, object? meta = null, string? errorCode = null) {
-            return new Result<T>() {
+        public Result<T> Unauthorized<T>(string? message = null, object? meta = null, string? errorCode = null)
+        {
+            return new Result<T>()
+            {
                 StatusCode = System.Net.HttpStatusCode.Unauthorized,
                 Succeeded = false,
                 Message = message ?? "Unauthorized Access",
@@ -96,8 +116,10 @@ namespace Template.Application.Common.Responses {
             };
         }
 
-        public Result<T> Forbid<T>(string? message = null, object? meta = null, string? errorCode = null) {
-            return new Result<T>() {
+        public Result<T> Forbid<T>(string? message = null, object? meta = null, string? errorCode = null)
+        {
+            return new Result<T>()
+            {
                 StatusCode = System.Net.HttpStatusCode.Forbidden,
                 Succeeded = false,
                 Message = message ?? "Access Forbidden",
@@ -106,8 +128,10 @@ namespace Template.Application.Common.Responses {
             };
         }
 
-        public Result<T> BadRequest<T>(string? Message = null, object? meta = null, string? errorCode = null) {
-            return new Result<T>() {
+        public Result<T> BadRequest<T>(string? Message = null, object? meta = null, string? errorCode = null)
+        {
+            return new Result<T>()
+            {
                 StatusCode = System.Net.HttpStatusCode.BadRequest,
                 Succeeded = false,
                 Message = Message == null ? "Bad Request" : Message,
@@ -116,8 +140,10 @@ namespace Template.Application.Common.Responses {
             };
         }
 
-        public Result<T> Conflict<T>(string? Message = null, object? meta = null, string? errorCode = null) {
-            return new Result<T>() {
+        public Result<T> Conflict<T>(string? Message = null, object? meta = null, string? errorCode = null)
+        {
+            return new Result<T>()
+            {
                 StatusCode = System.Net.HttpStatusCode.Conflict,
                 Succeeded = false,
                 Message = Message ?? "Conflict",
@@ -126,8 +152,10 @@ namespace Template.Application.Common.Responses {
             };
         }
 
-        public Result<T> NotFound<T>(string? message = null, object? meta = null, string? errorCode = null) {
-            return new Result<T>() {
+        public Result<T> NotFound<T>(string? message = null, object? meta = null, string? errorCode = null)
+        {
+            return new Result<T>()
+            {
                 StatusCode = System.Net.HttpStatusCode.NotFound,
                 Succeeded = false,
                 Message = message ?? "Not Found",
@@ -136,8 +164,10 @@ namespace Template.Application.Common.Responses {
             };
         }
 
-        public Result<T> FromServiceResult<T>(ServiceOperationResult<T>? serviceResult) {
-            return serviceResult!.Status switch {
+        public Result<T> FromServiceResult<T>(ServiceOperationResult<T>? serviceResult)
+        {
+            return serviceResult!.Status switch
+            {
                 ServiceOperationStatus.Succeeded => Success(serviceResult.Data!, serviceResult.Message, serviceResult.Meta),
                 ServiceOperationStatus.Created => Created(serviceResult.Data!, serviceResult.Message, serviceResult.Meta),
                 ServiceOperationStatus.Updated => Updated(serviceResult.Data!, serviceResult.Message, serviceResult.Meta),
@@ -151,8 +181,10 @@ namespace Template.Application.Common.Responses {
             };
         }
 
-        public Result FromServiceResult(ServiceOperationResult? serviceResult) {
-            return serviceResult!.Status switch {
+        public Result FromServiceResult(ServiceOperationResult? serviceResult)
+        {
+            return serviceResult!.Status switch
+            {
                 ServiceOperationStatus.Succeeded => Success(serviceResult.Message, serviceResult.Meta),
                 ServiceOperationStatus.Created => Created(serviceResult.Message, serviceResult.Meta),
                 ServiceOperationStatus.Updated => Updated(serviceResult.Message, serviceResult.Meta),
@@ -166,8 +198,14 @@ namespace Template.Application.Common.Responses {
             };
         }
 
-        public Result<TResponse> FromServiceResult<TResponse>(ServiceOperationResult serviceResult) {
-            return serviceResult.Status switch {
+        public Result<TResponse> FromServiceResult<TResponse>(ServiceOperationResult serviceResult)
+        {
+            return serviceResult.Status switch
+            {
+                ServiceOperationStatus.Succeeded => Success(default(TResponse)!, serviceResult.Message, serviceResult.Meta),
+                ServiceOperationStatus.Created => Created(default(TResponse)!, serviceResult.Message, serviceResult.Meta),
+                ServiceOperationStatus.Updated => Updated(default(TResponse)!, serviceResult.Message, serviceResult.Meta),
+                ServiceOperationStatus.Deleted => Deleted(default(TResponse)!, serviceResult.Message, serviceResult.Meta),
                 ServiceOperationStatus.NotFound => NotFound<TResponse>(serviceResult.Message, serviceResult.Meta, serviceResult.ErrorCode),
                 ServiceOperationStatus.AlreadyExists => Conflict<TResponse>(serviceResult.Message, serviceResult.Meta, serviceResult.ErrorCode),
                 ServiceOperationStatus.Unauthorized => Unauthorized<TResponse>(serviceResult.Message, serviceResult.Meta, serviceResult.ErrorCode),
@@ -177,6 +215,8 @@ namespace Template.Application.Common.Responses {
                 _ => BadRequest<TResponse>(serviceResult.Message, serviceResult.Meta, serviceResult.ErrorCode)
             };
         }
+
+
 
 
 

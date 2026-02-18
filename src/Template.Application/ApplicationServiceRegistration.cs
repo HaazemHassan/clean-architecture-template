@@ -11,7 +11,7 @@ namespace Template.Application
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
 
-            services.AddAutoMapper(cfg => { }, Assembly.GetExecutingAssembly());
+            services.AddAutoMapper(cfg => { }, AppDomain.CurrentDomain.GetAssemblies());
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 

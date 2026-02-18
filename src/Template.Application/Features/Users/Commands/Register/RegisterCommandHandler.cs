@@ -28,8 +28,12 @@ namespace Template.Application.Features.Users.Commands.Register
             var userToAdd = new DomainUser(request.FirstName, request.LastName, request.Email, request.PhoneNumber, request.Address);
 
             var addUserResult = await _applicationUserService.AddUser(userToAdd, request.Password, ct: cancellationToken);
-            return FromServiceResult<UserResponse>(addUserResult);
+            
+            if (!addUserResult.Succeeded)
+                return FromServiceResult<UserResponse>(addUserResult);
 
+            var userResponse = _mapper.Map<UserResponse>(addUserResult.Data);
+            return Created(userResponse, addUserResult.Message);
         }
     }
 }

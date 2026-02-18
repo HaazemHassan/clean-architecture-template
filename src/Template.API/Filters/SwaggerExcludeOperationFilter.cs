@@ -14,8 +14,10 @@ namespace Template.API.Filters;
 /// 
 /// Note: This affects Swagger documentation only, not runtime validation.
 /// </summary>
-public class SwaggerExcludeOperationFilter : IOperationFilter {
-    public void Apply(OpenApiOperation operation, OperationFilterContext context) {
+public class SwaggerExcludeOperationFilter : IOperationFilter
+{
+    public void Apply(OpenApiOperation operation, OperationFilterContext context)
+    {
         if (operation.RequestBody?.Content == null)
             return;
 
@@ -28,18 +30,22 @@ public class SwaggerExcludeOperationFilter : IOperationFilter {
         if (parametersToExclude.Count == 0)
             return;
 
-        foreach (var contentType in operation.RequestBody.Content.Values) {
+        foreach (var contentType in operation.RequestBody.Content.Values)
+        {
             if (contentType.Schema?.Properties == null)
                 continue;
 
-            foreach (var propertyName in parametersToExclude) {
+            foreach (var propertyName in parametersToExclude)
+            {
                 var keyToRemove = contentType.Schema.Properties.Keys
                     .FirstOrDefault(k => string.Equals(k, propertyName, StringComparison.OrdinalIgnoreCase));
 
-                if (keyToRemove != null) {
+                if (keyToRemove != null)
+                {
                     contentType.Schema.Properties.Remove(keyToRemove);
 
-                    if (contentType.Schema.Required != null && contentType.Schema.Required.Contains(keyToRemove)) {
+                    if (contentType.Schema.Required != null && contentType.Schema.Required.Contains(keyToRemove))
+                    {
                         contentType.Schema.Required.Remove(keyToRemove);
                     }
                 }

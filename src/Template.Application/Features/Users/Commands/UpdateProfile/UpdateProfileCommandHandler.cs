@@ -22,9 +22,6 @@ namespace Template.Application.Features.Users.Commands.UpdateProfile
 
         public async Task<Result<UpdateProfileCommandResponse>> Handle(UpdateProfileCommand request, CancellationToken cancellationToken)
         {
-            // Set UserId from current user if not provided (for backward compatibility)
-            if (request.OwnerUserId == 0)
-                request.OwnerUserId = _currentUserService.UserId!.Value;
 
             var userFromDb = await _unitOfWork.Users.GetByIdAsync(request.OwnerUserId, cancellationToken);
             if (userFromDb is null)
