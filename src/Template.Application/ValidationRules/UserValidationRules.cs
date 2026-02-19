@@ -1,14 +1,17 @@
 using FluentValidation;
-using System.Text.RegularExpressions;
 using Template.Application.Common.Options;
+using Template.Application.ServicesContracts.Infrastructure;
 
-namespace Template.Application.ValidationRules {
-    public static class UserValidationRules {
+namespace Template.Application.ValidationRules
+{
+    public static class UserValidationRules
+    {
         public static IRuleBuilderOptions<T, string?> ApplyNameRules<T>(
             this IRuleBuilder<T, string?> ruleBuilder,
             int minLength = 3,
             int maxLength = 15
-        ) {
+        )
+        {
             var rule = ruleBuilder;
 
 
@@ -24,7 +27,8 @@ namespace Template.Application.ValidationRules {
 
         public static IRuleBuilderOptions<T, string?> ApplyEmailRules<T>(
             this IRuleBuilder<T, string> ruleBuilder
-        ) {
+        )
+        {
             var rule = ruleBuilder;
             return rule
                 .MaximumLength(100)
@@ -37,29 +41,34 @@ namespace Template.Application.ValidationRules {
         public static IRuleBuilderOptions<T, string?> ApplyPasswordRules<T>(
              this IRuleBuilder<T, string> ruleBuilder,
              PasswordSettings settings
-        ) {
+        )
+        {
             var rule = (IRuleBuilderOptions<T, string>)ruleBuilder;
 
             rule = rule
                 .MinimumLength(settings.MinLength)
                 .WithMessage($"{{PropertyName}} must be at least {settings.MinLength} characters");
 
-            if (settings.RequireUppercase) {
+            if (settings.RequireUppercase)
+            {
                 rule = rule.Matches("[A-Z]")
                     .WithMessage("{PropertyName} must contain at least one uppercase letter");
             }
 
-            if (settings.RequireLowercase) {
+            if (settings.RequireLowercase)
+            {
                 rule = rule.Matches("[a-z]")
                     .WithMessage("{PropertyName} must contain at least one lowercase letter");
             }
 
-            if (settings.RequireDigit) {
+            if (settings.RequireDigit)
+            {
                 rule = rule.Matches("[0-9]")
                     .WithMessage("{PropertyName} must contain at least one number");
             }
 
-            if (settings.RequireNonAlphanumeric) {
+            if (settings.RequireNonAlphanumeric)
+            {
                 rule = rule.Matches(@"[\W_]")
                     .WithMessage("{PropertyName} must contain at least one special character");
 
@@ -69,11 +78,13 @@ namespace Template.Application.ValidationRules {
 
 
         public static IRuleBuilderOptions<T, string?> ApplyPhoneNumberRules<T>(
-            this IRuleBuilder<T, string?> ruleBuilder
-        ) {
+            this IRuleBuilder<T, string?> ruleBuilder,
+            IPhoneNumberService phoneNumberService
+        )
+        {
             var rule = ruleBuilder;
 
-            return rule.Must(phone => string.IsNullOrWhiteSpace(phone) || Regex.IsMatch(phone, @"^(\+20|0)(10|11|12|15)[0-9]{8}$"))
+            return rule.Must(phone => string.IsNullOrWhiteSpace(phone) || phoneNumberService.IsValid(phone))
                     .WithMessage("Phone number is not valid");
         }
 
@@ -81,7 +92,8 @@ namespace Template.Application.ValidationRules {
         public static IRuleBuilderOptions<T, string?> ApplyAddressRules<T>(
             this IRuleBuilder<T, string?> ruleBuilder,
             int maxLength = 200
-        ) {
+        )
+        {
             var rule = ruleBuilder;
 
             return rule
@@ -93,10 +105,12 @@ namespace Template.Application.ValidationRules {
         public static IRuleBuilderOptions<T, string?> ApplyConfirmPasswordRules<T>(
             this IRuleBuilder<T, string?> ruleBuilder,
             Func<T, string> passwordSelector
-        ) {
+        )
+        {
             var rule = ruleBuilder;
             return rule
-                .Must((model, confirmPassword) => {
+                .Must((model, confirmPassword) =>
+                {
                     var password = passwordSelector((T)model);
                     return password == confirmPassword;
                 })

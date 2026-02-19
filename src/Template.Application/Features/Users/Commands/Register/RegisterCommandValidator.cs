@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Template.Application.Common.Options;
+using Template.Application.ServicesContracts.Infrastructure;
 using Template.Application.ValidationRules;
 using Template.Application.ValidationRules.Common;
 
@@ -7,12 +8,17 @@ namespace Template.Application.Features.Users.Commands.Register
 {
     public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
     {
-        public RegisterCommandValidator(PasswordSettings passwordSettings)
+        private readonly IPhoneNumberService _phoneNumberService;
+        private readonly PasswordSettings _passwordSettings;
+        public RegisterCommandValidator(PasswordSettings passwordSettings, IPhoneNumberService phoneNumberService)
         {
-            ApplyValidationRules(passwordSettings);
+            _passwordSettings = passwordSettings;
+            _phoneNumberService = phoneNumberService;
+
+            ApplyValidationRules();
         }
 
-        private void ApplyValidationRules(PasswordSettings passwordSettings)
+        private void ApplyValidationRules()
         {
             RuleFor(x => x.FirstName).Required();
             RuleFor(x => x.LastName).Required();
@@ -42,7 +48,7 @@ namespace Template.Application.Features.Users.Commands.Register
 
             When(x => !string.IsNullOrWhiteSpace(x.Password), () =>
             {
-                RuleFor(x => x.Password).ApplyPasswordRules(passwordSettings);
+                RuleFor(x => x.Password).ApplyPasswordRules(_passwordSettings);
             });
 
 
@@ -56,7 +62,7 @@ namespace Template.Application.Features.Users.Commands.Register
 
             When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber), () =>
             {
-                RuleFor(x => x.PhoneNumber).ApplyPhoneNumberRules();
+                RuleFor(x => x.PhoneNumber).ApplyPhoneNumberRules(_phoneNumberService);
             });
 
             When(x => !string.IsNullOrWhiteSpace(x.Address), () =>

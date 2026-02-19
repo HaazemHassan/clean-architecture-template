@@ -17,7 +17,7 @@ namespace Template.API.Controllers.Admin
             var result = await Mediator.Send(command);
             if (result.IsError)
                 return Problem(result.Errors);
-            return CreatedAtRoute(routeName: RouteNames.Users.GetUserById, routeValues: new { id = result.Value!.Id }, value: result);
+            return CreatedAtRoute(routeName: RouteNames.Users.GetUserById, routeValues: new { id = result.Value!.Id }, value: result.Value);
         }
 
 

@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Template.Application.Common.Options;
 using Template.Application.Contracts.Infrastructure;
 using Template.Application.Security.Contracts;
+using Template.Application.ServicesContracts.Infrastructure;
 using Template.Domain.Contracts.Repositories;
 using Template.Infrastructure.BackgroundJobs;
 using Template.Infrastructure.BackgroundJobs.Jobs;
@@ -127,6 +128,8 @@ public static class InfrastructureServiceRegistration
         services.AddTransient<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IPolicyEnforcer, PolicyEnforcer>();
         services.AddScoped<IAuthorizationService, AuthorizationService>();
+        services.AddSingleton<IPhoneNumberService, PhoneNumberService>();
+
 
 
 

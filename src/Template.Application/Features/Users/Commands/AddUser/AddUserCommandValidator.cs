@@ -1,15 +1,25 @@
 ﻿using FluentValidation;
 using Template.Application.Common.Options;
+using Template.Application.ServicesContracts.Infrastructure;
 using Template.Application.ValidationRules;
 using Template.Application.ValidationRules.Common;
 
-namespace Template.Application.Features.Users.Commands.AddUser {
-    public class AddUserCommandValidator : AbstractValidator<AddUserCommand> {
-        public AddUserCommandValidator(PasswordSettings passwordSettings) {
-            ApplyValidationRules(passwordSettings);
+namespace Template.Application.Features.Users.Commands.AddUser
+{
+    public class AddUserCommandValidator : AbstractValidator<AddUserCommand>
+    {
+        private readonly IPhoneNumberService _phoneNumberService;
+        private readonly PasswordSettings _passwordSettings;
+        public AddUserCommandValidator(PasswordSettings passwordSettings, IPhoneNumberService phoneNumberService)
+        {
+            _passwordSettings = passwordSettings;
+            _phoneNumberService = phoneNumberService;
+
+            ApplyValidationRules();
         }
 
-        private void ApplyValidationRules(PasswordSettings passwordSettings) {
+        private void ApplyValidationRules()
+        {
             RuleFor(x => x.FirstName).Required();
             RuleFor(x => x.LastName).Required();
             RuleFor(x => x.Email).Required();
@@ -20,33 +30,39 @@ namespace Template.Application.Features.Users.Commands.AddUser {
 
 
 
-            When(x => !string.IsNullOrWhiteSpace(x.FirstName), () => {
+            When(x => !string.IsNullOrWhiteSpace(x.FirstName), () =>
+            {
                 RuleFor(x => x.FirstName).ApplyNameRules();
             });
 
 
-            When(x => !string.IsNullOrWhiteSpace(x.LastName), () => {
+            When(x => !string.IsNullOrWhiteSpace(x.LastName), () =>
+            {
                 RuleFor(x => x.LastName).ApplyNameRules();
             });
 
 
-            When(x => !string.IsNullOrWhiteSpace(x.Email), () => {
+            When(x => !string.IsNullOrWhiteSpace(x.Email), () =>
+            {
                 RuleFor(x => x.Email).ApplyEmailRules();
             });
 
 
-            When(x => !string.IsNullOrWhiteSpace(x.Password), () => {
-                RuleFor(x => x.Password).ApplyPasswordRules(passwordSettings);
+            When(x => !string.IsNullOrWhiteSpace(x.Password), () =>
+            {
+                RuleFor(x => x.Password).ApplyPasswordRules(_passwordSettings);
             });
 
 
-            When(x => !string.IsNullOrWhiteSpace(x.Password) && !string.IsNullOrWhiteSpace(x.ConfirmPassword), () => {
+            When(x => !string.IsNullOrWhiteSpace(x.Password) && !string.IsNullOrWhiteSpace(x.ConfirmPassword), () =>
+            {
                 RuleFor(x => x.ConfirmPassword).ApplyConfirmPasswordRules(x => x.Password);
             });
 
 
-            When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber), () => {
-                RuleFor(x => x.PhoneNumber).ApplyPhoneNumberRules();
+            When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber), () =>
+            {
+                RuleFor(x => x.PhoneNumber).ApplyPhoneNumberRules(_phoneNumberService);
             });
 
             RuleFor(x => x.UserRole)
