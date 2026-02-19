@@ -1,12 +1,14 @@
 using AutoMapper;
+using ErrorOr;
 using MediatR;
-using Template.Application.Common.Responses;
 using Template.Application.Specifications.Users;
+using Template.Domain.Common.Constants;
 using Template.Domain.Contracts.Repositories;
+using Template.Domain.Entities;
 
 namespace Template.Application.Features.Users.Queries.GetUserById
 {
-    public class GetUserByIdQueryHandler : ResultHandler, IRequestHandler<GetUserByIdQuery, Result<GetUserByIdQueryResponse>>
+    public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, ErrorOr<GetUserByIdQueryResponse>>
     {
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
@@ -17,15 +19,14 @@ namespace Template.Application.Features.Users.Queries.GetUserById
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Result<GetUserByIdQueryResponse>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<GetUserByIdQueryResponse>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
         {
-            var spec = new UserDetailsProjectionSpec(request.Id);
-            var user = await _unitOfWork.Users.FirstOrDefaultAsync(spec);
+            var spec = new GetByIdSpec<DomainUser>(request.OwnerUserId);
+            var user = await _unitOfWork.Users.GetAsync<GetUserByIdQueryResponse>(spec, cancellationToken);
             if (user is null)
-                return NotFound<GetUserByIdQueryResponse>();
+                return Error.NotFound(code: ErrorCodes.User.UserNotFound, description: "User not found");
 
-            var userResponse = _mapper.Map<GetUserByIdQueryResponse>(user);
-            return Success(userResponse);
+            return user;
         }
     }
 }

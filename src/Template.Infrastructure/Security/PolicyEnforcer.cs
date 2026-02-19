@@ -1,53 +1,32 @@
-﻿using Template.Application.Common.Responses;
-using Template.Application.Common.Security;
-using Template.Application.Contracts.Requests;
-using Template.Application.Contracts.Services.Api;
-using Template.Application.Contracts.Services.Infrastructure;
-using Template.Application.Enums;
-using Template.Domain.Enums;
+﻿using ErrorOr;
+using Template.Application.Security.Contracts;
+using Template.Application.Security.Policies;
+using Template.Domain.Common.Constants;
 
 namespace Template.Infrastructure.Security
 {
-    internal class PolicyEnforcer(ICurrentUserService _currentUserService) : IPolicyEnforcer
+    internal class PolicyEnforcer : IPolicyEnforcer
     {
-        public ServiceOperationResult Authorize<TRequest>(
-            TRequest request, int userId, string policyName)
+        private readonly IEnumerable<IAuthorizationPolicy> _policies;
+
+        public PolicyEnforcer(IEnumerable<IAuthorizationPolicy> policies)
         {
-            return policyName switch
-            {
-                AuthorizationPolicies.SelfOrAdmin
-                    when request is IOwnedResourceRequest owned
-                        => SelfOrAdminPolicy(owned, userId),
-
-                AuthorizationPolicies.SelfOrAdmin
-                        => ServiceOperationResult.Failure(
-                                ServiceOperationStatus.InvalidParameters,
-                                "Request must implement IOwnedResourceRequest"),
-
-                _ => ServiceOperationResult.Failure(
-                        ServiceOperationStatus.Failed,
-                        $"Unknown policy: {policyName}")
-            };
+            _policies = policies;
         }
-
-        private ServiceOperationResult SelfOrAdminPolicy(IOwnedResourceRequest request, int currentUserId)
+        public ErrorOr<Success> Authorize<TRequest>(TRequest request, string policyName)
         {
+            var policy = _policies.FirstOrDefault(p => p.Name == policyName);
 
-            if (!_currentUserService.IsAuthenticated)
-
+            if (policy is null)
             {
-                return ServiceOperationResult.Failure(ServiceOperationStatus.NotFound, "User not authenticated");
+                return Error.Failure(
+                    code: ErrorCodes.Authorization.UnknownPolicy,
+                    description: $"Unknown policy: {policyName}");
             }
 
-            var isAdmin = _currentUserService.IsInRole(UserRole.Admin);
-
-
-            if (isAdmin || request.OwnerUserId == currentUserId)
-            {
-                return ServiceOperationResult.Success();
-            }
-
-            return ServiceOperationResult.Failure(ServiceOperationStatus.Forbidden, "You are not allowed to perform this action on this resource.");
+            return policy.Authorize(request!);
         }
+
+
     }
 }

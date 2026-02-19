@@ -1,14 +1,14 @@
 using AutoMapper;
+using ErrorOr;
 using MediatR;
-using Template.Application.Common.Responses;
-using Template.Application.Contracts.Services.Infrastructure;
+using Template.Application.Contracts.Infrastructure;
 using Template.Application.Features.Users.Common;
 using Template.Domain.Contracts.Repositories;
 using Template.Domain.Entities;
 
 namespace Template.Application.Features.Users.Commands.Register
 {
-    public class RegisterCommandHandler : ResultHandler, IRequestHandler<RegisterCommand, Result<UserResponse>>
+    public class RegisterCommandHandler : IRequestHandler<RegisterCommand, ErrorOr<UserResponse>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -23,17 +23,17 @@ namespace Template.Application.Features.Users.Commands.Register
             _authenticationService = authenticationService;
         }
 
-        public async Task<Result<UserResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
+        public async Task<ErrorOr<UserResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
             var userToAdd = new DomainUser(request.FirstName, request.LastName, request.Email, request.PhoneNumber, request.Address);
 
             var addUserResult = await _applicationUserService.AddUser(userToAdd, request.Password, ct: cancellationToken);
-            
-            if (!addUserResult.Succeeded)
-                return FromServiceResult<UserResponse>(addUserResult);
 
-            var userResponse = _mapper.Map<UserResponse>(addUserResult.Data);
-            return Created(userResponse, addUserResult.Message);
+            if (addUserResult.IsError)
+                return addUserResult.Errors;
+
+            var userResponse = _mapper.Map<UserResponse>(addUserResult.Value);
+            return userResponse;
         }
     }
 }

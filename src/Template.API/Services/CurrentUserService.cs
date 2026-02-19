@@ -1,6 +1,6 @@
 using System.Security.Claims;
-using Template.Application.Contracts.Services.Api;
-using Template.Domain.Enums;
+using Template.Application.Contracts.Api;
+using Template.Domain.Common.Enums;
 
 namespace Template.API.Services
 {

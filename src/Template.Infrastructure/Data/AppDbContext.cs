@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.Reflection;
-using Template.Application.Contracts.Services.Api;
+using Template.Application.Contracts.Api;
 using Template.Domain.Common.Auditing;
 using Template.Domain.Entities;
-using Template.Infrastructure.Data.IdentityEntities;
+using Template.Infrastructure.Data.Identity.Entities;
 
 namespace Template.Infrastructure.Data
 {

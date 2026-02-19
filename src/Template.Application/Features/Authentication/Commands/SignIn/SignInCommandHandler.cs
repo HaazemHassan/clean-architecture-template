@@ -1,24 +1,18 @@
+using ErrorOr;
 using MediatR;
-using Template.Application.Common.Responses;
-using Template.Application.Contracts.Services.Infrastructure;
+using Template.Application.Contracts.Infrastructure;
 using Template.Application.Features.Authentication.Common;
 using Template.Domain.Contracts.Repositories;
 
 namespace Template.Application.Features.Authentication.Commands.SignIn;
 
-public class SignInCommandHandler : ResultHandler, IRequestHandler<SignInCommand, Result<AuthResult>> {
-    private readonly IAuthenticationService _authenticationService;
-    private readonly IUnitOfWork _unitOfWork;
+public class SignInCommandHandler(IAuthenticationService _authenticationService, IUnitOfWork _unitOfWork)
+    : IRequestHandler<SignInCommand, ErrorOr<AuthResult>> {
 
-    public SignInCommandHandler(IAuthenticationService authenticationService, IUnitOfWork unitOfWork) {
-        _authenticationService = authenticationService;
-        _unitOfWork = unitOfWork;
-    }
-
-    public async Task<Result<AuthResult>> Handle(SignInCommand request, CancellationToken cancellationToken) {
+    public async Task<ErrorOr<AuthResult>> Handle(SignInCommand request, CancellationToken cancellationToken) {
         var authResult = await _authenticationService.SignInWithPassword(request.Email, request.Password);
-        if (authResult.Succeeded)
+        if (!authResult.IsError)
             await _unitOfWork.SaveChangesAsync(cancellationToken);
-        return FromServiceResult(authResult);
+        return authResult;
     }
 }

@@ -1,11 +1,11 @@
+using ErrorOr;
 using MediatR;
-using Template.Application.Common.Responses;
-using Template.Application.Common.Security;
+using Template.Application.Security;
 
 namespace Template.Application.Features.Authentication.Commands.Logout
 {
     [Authorize]
-    public class LogoutCommand : IRequest<Result>
+    public class LogoutCommand : IRequest<ErrorOr<Success>>
     {
         public string? RefreshToken { get; set; }
     }

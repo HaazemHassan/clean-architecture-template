@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Template.API.Requests.Client.Users;
+using Template.API.Requests.Management.Users;
 using Template.Application.Features.Users.Commands.UpdateProfile;
 
 namespace Template.API.Requests
@@ -7,7 +9,13 @@ namespace Template.API.Requests
     {
         public RequestsMappingProfile()
         {
+
+            //Users requests
             CreateMap<UpdateMyPorfileRequest, UpdateProfileCommand>();
+
+
+            //Admin requests
+            CreateMap<UpdateUserRequest, UpdateProfileCommand>();
         }
 
     }

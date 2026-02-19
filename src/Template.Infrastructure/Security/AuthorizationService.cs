@@ -1,14 +1,14 @@
-using Template.Application.Common.Responses;
-using Template.Application.Contracts.Services.Api;
-using Template.Application.Contracts.Services.Infrastructure;
-using Template.Application.Enums;
-using Template.Domain.Enums;
+using ErrorOr;
+using Template.Application.Contracts.Api;
+using Template.Application.Security.Contracts;
+using Template.Domain.Common.Constants;
+using Template.Domain.Common.Enums;
 
 namespace Template.Infrastructure.Security
 {
     internal class AuthorizationService(ICurrentUserService _currentUserService, IPolicyEnforcer _policyEnforcer) : IAuthorizationService
     {
-        public ServiceOperationResult AuthorizeCurrentUser<TRequest>(
+        public ErrorOr<Success> AuthorizeCurrentUser<TRequest>(
             TRequest request,
             List<UserRole> requiredRoles,
             List<Permission> requiredPermissions,
@@ -16,32 +16,30 @@ namespace Template.Infrastructure.Security
             )
         {
 
-            var userId = _currentUserService.UserId;
-
 
             if (!_currentUserService.HasAllPermissions(requiredPermissions))
             {
-                return ServiceOperationResult.Failure(ServiceOperationStatus.Forbidden, "User is missing required permissions for taking this action");
+                return Error.Forbidden(code: ErrorCodes.Authorization.MissingPermissions, description: "User is missing required permissions for taking this action");
             }
 
             if (!_currentUserService.HasAllRoles(requiredRoles))
             {
-                return ServiceOperationResult.Failure(ServiceOperationStatus.Forbidden, "User is missing required roles for taking this action");
+                return Error.Forbidden(code: ErrorCodes.Authorization.MissingRoles, description: "User is missing required roles for taking this action");
             }
 
 
 
             foreach (var policy in requiredPolicies)
             {
-                var authorizationAgainstPolicyResult = _policyEnforcer.Authorize(request, userId!.Value, policy);
+                var authorizationAgainstPolicyResult = _policyEnforcer.Authorize(request, policy);
 
-                if (!authorizationAgainstPolicyResult.Succeeded)
+                if (authorizationAgainstPolicyResult.IsError)
                 {
-                    return authorizationAgainstPolicyResult;
+                    return authorizationAgainstPolicyResult.Errors;
                 }
             }
 
-            return ServiceOperationResult.Success();
+            return Result.Success;
         }
 
 

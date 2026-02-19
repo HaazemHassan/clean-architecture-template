@@ -1,48 +1,54 @@
-﻿using MediatR;
+﻿using ErrorOr;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using System.Net;
-using Template.Application.Common.Responses;
 
-namespace Template.API.Controllers {
+namespace Template.API.Controllers
+{
     [Route("api/[controller]")]
     [ApiController]
     [EnableRateLimiting("defaultLimiter")]
-    public class BaseController : ControllerBase {
+    public class BaseController : ControllerBase
+    {
 
         private IMediator? _mediatorInstance;
         protected IMediator Mediator => _mediatorInstance ??= HttpContext.RequestServices.GetService<IMediator>()!;
 
         #region Actions
-        protected ObjectResult NewResult<T>(Result<T> response) {
-            return response.StatusCode switch {
-                HttpStatusCode.OK => new OkObjectResult(response),
-                HttpStatusCode.Created => new CreatedResult(string.Empty, response),
-                HttpStatusCode.Unauthorized => new UnauthorizedObjectResult(response),
-                HttpStatusCode.BadRequest => new BadRequestObjectResult(response),
-                HttpStatusCode.NotFound => new NotFoundObjectResult(response),
-                HttpStatusCode.Accepted => new AcceptedResult(string.Empty, response),
-                HttpStatusCode.UnprocessableEntity => new UnprocessableEntityObjectResult(response),
-                _ => new BadRequestObjectResult(response),
+
+        protected ActionResult Problem(List<Error> errors)
+        {
+            var problem = Results.Problem(statusCode: GetStatusCode(errors.FirstOrDefault().Type));
+            var problemDetail = problem.GetType().GetProperty(nameof(ProblemDetails))!.GetValue(problem) as ProblemDetails;
+            problemDetail!.Extensions = new Dictionary<string, object?>()
+            {
+                ["errors"] = errors.Select(e => new { e.Code, e.Description })
+            };
+
+
+            return new ObjectResult(problemDetail);
+
+
+        }
+
+        private static int GetStatusCode(ErrorType errorType)
+        {
+            return errorType switch
+            {
+                ErrorType.Conflict => StatusCodes.Status409Conflict,
+                ErrorType.Validation => StatusCodes.Status400BadRequest,
+                ErrorType.NotFound => StatusCodes.Status404NotFound,
+                ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
+                ErrorType.Forbidden => StatusCodes.Status403Forbidden,
+                _ => StatusCodes.Status500InternalServerError,
             };
         }
 
-        protected ObjectResult NewResult(Result response) {
-            return response.StatusCode switch {
-                HttpStatusCode.OK => new OkObjectResult(response),
-                HttpStatusCode.Created => new CreatedResult(string.Empty, response),
-                HttpStatusCode.Unauthorized => new UnauthorizedObjectResult(response),
-                HttpStatusCode.BadRequest => new BadRequestObjectResult(response),
-                HttpStatusCode.NotFound => new NotFoundObjectResult(response),
-                HttpStatusCode.Accepted => new AcceptedResult(string.Empty, response),
-                HttpStatusCode.UnprocessableEntity => new UnprocessableEntityObjectResult(response),
-                _ => new BadRequestObjectResult(response),
-            };
-        }
         #endregion
 
 
     }
 
 }
+
 

@@ -8,6 +8,7 @@
 
   <ItemGroup>
 	<PackageReference Include="AutoMapper" Version="16.0.0" />
+	<PackageReference Include="ErrorOr" Version="2.0.1" />
 	<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
 	<PackageReference Include="MediatR" Version="14.0.0" />
   </ItemGroup>
@@ -17,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Contracts\Services\Application\" />
+    <Folder Include="ServicesContracts\Application\" />
     <Folder Include="Services\" />
   </ItemGroup>
 

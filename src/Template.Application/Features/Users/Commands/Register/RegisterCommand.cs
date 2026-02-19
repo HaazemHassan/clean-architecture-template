@@ -1,11 +1,11 @@
-﻿using MediatR;
-using Template.Application.Common.Responses;
-using Template.Application.Contracts.Requests;
+﻿using ErrorOr;
+using MediatR;
+using Template.Application.Common.Behaviors.Transaction;
 using Template.Application.Features.Users.Common;
 
 namespace Template.Application.Features.Users.Commands.Register
 {
-    public class RegisterCommand : IRequest<Result<UserResponse>>, ITransactionalRequest
+    public class RegisterCommand : IRequest<ErrorOr<UserResponse>>, ITransactionalRequest
     {
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;

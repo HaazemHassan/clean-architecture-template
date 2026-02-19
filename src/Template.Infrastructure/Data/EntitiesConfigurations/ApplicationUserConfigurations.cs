@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Template.Infrastructure.Data.IdentityEntities;
+using Template.Infrastructure.Data.Identity.Entities;
 
 namespace Template.Infrastructure.Data.EntitiesConfiguration
 {

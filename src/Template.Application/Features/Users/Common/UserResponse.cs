@@ -1,7 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Template.Application.Features.Users.Common {
-    public class UserResponse {
+namespace Template.Application.Features.Users.Common
+{
+    public class UserResponse
+    {
 
         [JsonPropertyOrder(-1)]
         public int Id { get; set; }

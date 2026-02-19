@@ -1,15 +1,18 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Template.Application.Common.Options;
-using Template.Application.Contracts.Services.Infrastructure;
+using Template.Application.Contracts.Infrastructure;
+using Template.Application.Security.Contracts;
 using Template.Domain.Contracts.Repositories;
+using Template.Infrastructure.BackgroundJobs;
+using Template.Infrastructure.BackgroundJobs.Jobs;
 using Template.Infrastructure.Data;
-using Template.Infrastructure.Data.IdentityEntities;
+using Template.Infrastructure.Data.Identity.Entities;
+using Template.Infrastructure.Data.Repositories;
 using Template.Infrastructure.Data.Seeding;
-using Template.Infrastructure.Jobs;
-using Template.Infrastructure.Repositories;
 using Template.Infrastructure.Security;
 using Template.Infrastructure.Services;
 
@@ -25,6 +28,7 @@ public static class InfrastructureServiceRegistration
         AddIdentityConfigurations(services, configuration);
         AddRepositories(services);
         AddServices(services);
+        AddHangfireConfiguration(services, configuration);
         AddBackgroundJobs(services);
 
         return services;
@@ -75,7 +79,30 @@ public static class InfrastructureServiceRegistration
         return services;
     }
 
+    private static IServiceCollection AddHangfireConfiguration(IServiceCollection services, IConfiguration configuration)
+    {
 
+        var hangfireSettings = new HangfireSettings();
+        configuration.GetSection(HangfireSettings.SectionName).Bind(hangfireSettings);
+        services.AddSingleton(hangfireSettings);
+
+        services.AddHangfire(config => config
+         .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+         .UseSimpleAssemblyNameTypeSerializer()
+         .UseRecommendedSerializerSettings()
+         .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
+
+        services.AddHangfireServer();
+
+        return services;
+    }
+
+    private static IServiceCollection AddBackgroundJobs(IServiceCollection services)
+    {
+        services.AddScoped<RefreshTokensCleanupJob>();
+
+        return services;
+    }
 
 
     private static IServiceCollection AddRepositories(IServiceCollection services)
@@ -106,10 +133,5 @@ public static class InfrastructureServiceRegistration
         return services;
     }
 
-    private static IServiceCollection AddBackgroundJobs(IServiceCollection services)
-    {
-        services.AddScoped<RefreshTokensCleanupJob>();
 
-        return services;
-    }
 }

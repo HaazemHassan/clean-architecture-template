@@ -1,18 +1,13 @@
-﻿using Hangfire;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.RateLimiting;
-using Template.API.Exceptions;
-using Template.API.Filters;
 using Template.API.RateLimiting;
 using Template.API.Services;
 using Template.Application;
-using Template.Application.Common.Responses;
-using Template.Application.Contracts.Services.Api;
+using Template.Application.Contracts.Api;
 using Template.Infrastructure;
 using Template.Infrastructure.Common.Options;
 
@@ -44,7 +39,6 @@ namespace Template.API
             AddAuthenticationConfigurations(services, configuration);
             AddSwaggerConfigurations(services);
             AddRateLimitingConfigurations(services, configuration);
-            AddHangfireConfiguration(services, configuration);
 
             // Register Exception Handler
             services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -72,7 +66,6 @@ namespace Template.API
                     Version = "v1",
                     Description = "API for Template application"
                 });
-                options.OperationFilter<SwaggerExcludeOperationFilter>();
 
                 //options.EnableAnnotations();
 
@@ -219,9 +212,9 @@ namespace Template.API
                     }
                     context.HttpContext.Response.Headers.RetryAfter = retryAfterSeconds.ToString();
 
-                    var response = new Result<string>
+                    var response = new
                     {
-                        StatusCode = HttpStatusCode.TooManyRequests,
+                        StatusCode = StatusCodes.Status429TooManyRequests,
                         Message = "Too many requests. Please try again later.",
                         Succeeded = false
                     };
@@ -245,24 +238,6 @@ namespace Template.API
                 var hash = SHA256.HashData(bytes);
                 return Convert.ToBase64String(hash);
             }
-        }
-
-        private static IServiceCollection AddHangfireConfiguration(IServiceCollection services, IConfiguration configuration)
-        {
-
-            var hangfireSettings = new HangfireSettings();
-            configuration.GetSection(HangfireSettings.SectionName).Bind(hangfireSettings);
-            services.AddSingleton(hangfireSettings);
-
-            services.AddHangfire(config => config
-             .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-             .UseSimpleAssemblyNameTypeSerializer()
-             .UseRecommendedSerializerSettings()
-             .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
-
-            services.AddHangfireServer();
-
-            return services;
         }
 
     }

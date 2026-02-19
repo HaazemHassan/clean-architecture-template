@@ -9,4 +9,8 @@ public interface IGenericRepository<T> : IRepositoryBase<T> where T : class
     Task<T?> GetAsync(Expression<Func<T, bool>> predicate, CancellationToken ct);
     Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken ct);
     Task<int> CountAsync(Expression<Func<T, bool>>? predicate, CancellationToken ct);
+
+
+    Task<TDestination?> GetAsync<TDestination>(ISpecification<T> spec, CancellationToken ct);
+    Task<List<TDestination>> ListAsync<TDestination>(ISpecification<T> spec, CancellationToken ct);
 }

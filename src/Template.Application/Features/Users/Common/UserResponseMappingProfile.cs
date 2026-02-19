@@ -4,11 +4,13 @@ using Template.Domain.Entities;
 
 namespace Template.Application.Features.Users.Mapping;
 
-public partial class UserResponseMappingProfile : Profile {
-    public UserResponseMappingProfile() {
+public partial class UserResponseMappingProfile : Profile
+{
+    public UserResponseMappingProfile()
+    {
         CreateMap<DomainUser, UserResponse>()
-                  .ForMember(dest => dest.FullName,
-                     opt => opt.MapFrom(src => src.FullName))
+            .ForMember(dest => dest.FullName,
+               opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"))
                   .IncludeAllDerived();
     }
 }

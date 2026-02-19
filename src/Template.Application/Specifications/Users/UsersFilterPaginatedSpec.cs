@@ -1,12 +1,15 @@
 ﻿using Ardalis.Specification;
-using Template.Application.Extensions;
-using Template.Application.Features.Users.Queries.GetUsersPaginated;
 using Template.Domain.Entities;
+using Template.Domain.Specifications;
 
-namespace Template.Application.Specifications.Users {
-    public class UsersFilterPaginatedSpec : Specification<DomainUser, GetUsersPaginatedQueryResponse> {
-        public UsersFilterPaginatedSpec(int pageNumber, int pageSize, string? search, string? sortBy) {
-            if (!string.IsNullOrEmpty(search)) {
+namespace Template.Application.Specifications.Users
+{
+    public class UsersFilterPaginatedSpec : Specification<DomainUser>
+    {
+        public UsersFilterPaginatedSpec(int pageNumber, int pageSize, string? search, string? sortBy)
+        {
+            if (!string.IsNullOrEmpty(search))
+            {
                 Query.Where(u => u.FirstName.Contains(search) || u.Email.Contains(search));
             }
 
@@ -17,15 +20,6 @@ namespace Template.Application.Specifications.Users {
 
             Query.Paginate(pageNumber, pageSize);
 
-            Query.Select(u => new GetUsersPaginatedQueryResponse {
-                Id = u.Id,
-                FirstName = u.FirstName,
-                LastName = u.LastName,
-                FullName = u.FullName,
-                Email = u.Email,
-                Address = u.Address ?? string.Empty,
-                Phone = u.PhoneNumber
-            });
             Query.AsNoTracking();
 
         }

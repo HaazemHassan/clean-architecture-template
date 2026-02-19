@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using ErrorOr;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -7,17 +8,16 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Template.Application.Common.Responses;
-using Template.Application.Contracts.Services.Api;
-using Template.Application.Contracts.Services.Infrastructure;
-using Template.Application.Enums;
+using Template.Application.Contracts.Api;
+using Template.Application.Contracts.Infrastructure;
 using Template.Application.Features.Authentication.Common;
 using Template.Application.Features.Users.Common;
+using Template.Domain.Common.Constants;
 using Template.Domain.Contracts.Repositories;
 using Template.Domain.Entities;
 using Template.Infrastructure.Common.Options;
 using Template.Infrastructure.Data;
-using Template.Infrastructure.Data.IdentityEntities;
+using Template.Infrastructure.Data.Identity.Entities;
 using Template.Infrastructure.Specifications.RefreshTokens;
 
 namespace Template.Infrastructure.Services
@@ -52,62 +52,59 @@ namespace Template.Infrastructure.Services
             //_emailService = emailService;
         }
 
-        public async Task<ServiceOperationResult<AuthResult>> SignInWithPassword(string email, string passwod, CancellationToken ct = default)
+        public async Task<ErrorOr<AuthResult>> SignInWithPassword(string email, string password, CancellationToken ct = default)
         {
             var userFromDb = await _userManager.Users.Include(au => au.DomainUser)
                                 .FirstOrDefaultAsync(u => u.Email == email, cancellationToken: ct);
             if (userFromDb is null)
             {
                 _logger.LogWarning("Failed login attempt for email: {Email} - User not found", email);
-                return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "Invalid Email or password");
+                return Error.Unauthorized(code: ErrorCodes.Authentication.InvalidCredentials, description: "Invalid Email or password");
             }
 
-            bool isAuthenticated = await _userManager.CheckPasswordAsync(userFromDb, passwod);
+            bool isAuthenticated = await _userManager.CheckPasswordAsync(userFromDb, password);
             if (!isAuthenticated)
             {
                 _logger.LogWarning("Failed login attempt for email: {Email} - Invalid password", email);
-                return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "Invalid Email or password");
+                return Error.Unauthorized(code: ErrorCodes.Authentication.InvalidCredentials, description: "Invalid Email or password");
             }
 
-            //if (!userFromDb.EmailConfirmed)
-            //return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "Please confirm your email first");
-
             var result = await AuthenticateAsync(userFromDb);
-            if (result.Succeeded)
+            if (!result.IsError)
             {
                 _logger.LogInformation("Successful login for user: {Email}", email);
             }
             return result;
         }
 
-        public async Task<ServiceOperationResult<AuthResult>> ReAuthenticateAsync(string refreshToken, string accessToken, CancellationToken ct = default)
+        public async Task<ErrorOr<AuthResult>> ReAuthenticateAsync(string refreshToken, string accessToken, CancellationToken ct = default)
         {
             var isValidAccessToken = ValidateAccessToken(accessToken, validateLifetime: false);
             if (!isValidAccessToken)
             {
                 _logger.LogWarning("ReAuthenticate failed - Invalid access token");
-                return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "Invalid access token");
+                return Error.Unauthorized(code: ErrorCodes.Authentication.InvalidAccessToken, description: "Invalid access token");
             }
 
             var jwt = ReadJWT(accessToken);
             if (jwt is null)
             {
                 _logger.LogWarning("ReAuthenticate failed - Cannot read JWT");
-                return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "Invalid access token");
+                return Error.Unauthorized(code: ErrorCodes.Authentication.InvalidAccessToken, description: "Invalid access token");
             }
 
             var domainUserId = jwt.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
             if (domainUserId is null)
             {
                 _logger.LogWarning("ReAuthenticate failed - User id is null in JWT");
-                return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "User id is null");
+                return Error.Unauthorized(code: ErrorCodes.Authentication.InvalidAccessToken, description: "User id is null");
             }
 
             var appUser = await _userManager.Users.Include(au => au.DomainUser).FirstOrDefaultAsync(au => au.DomainUserId.ToString() == domainUserId, cancellationToken: ct);
             if (appUser is null)
             {
                 _logger.LogWarning("ReAuthenticate failed - User not found for ID: {UserId}", domainUserId);
-                return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "User not found");
+                return Error.NotFound(code: ErrorCodes.User.UserNotFound, description: "User not found");
             }
 
             var currentRefreshTokenSpec = new ActiveRefreshTokenByJtiAndTokenSpec(jwt.Id, refreshToken, appUser.Id);
@@ -117,13 +114,12 @@ namespace Template.Infrastructure.Services
             if (currentRefreshToken is null || !currentRefreshToken.IsActive)
             {
                 _logger.LogWarning("ReAuthenticate failed - Invalid or inactive refresh token for user: {Email}", appUser.Email);
-                return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Unauthorized, "Refresh token is not valid");
+                return Error.Unauthorized(code: ErrorCodes.Authentication.InvalidRefreshToken, description: "Refresh token is not valid");
             }
 
-            //new jwt result
             var jwtResultOperation = await AuthenticateAsync(appUser, currentRefreshToken!.Expires);
-            if (!jwtResultOperation.Succeeded)
-                return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.Failed, jwtResultOperation.Message);
+            if (jwtResultOperation.IsError)
+                return jwtResultOperation.Errors;
 
             currentRefreshToken.Revoke();
             await _unitOfWork.RefreshTokens.UpdateAsync(currentRefreshToken, ct);
@@ -132,17 +128,17 @@ namespace Template.Infrastructure.Services
         }
 
 
-        public async Task<ServiceOperationResult> LogoutAsync(string refreshToken, CancellationToken ct = default)
+        public async Task<ErrorOr<Success>> LogoutAsync(string refreshToken, CancellationToken ct = default)
         {
             if (!_currentUserService.IsAuthenticated)
-                return ServiceOperationResult.Failure(ServiceOperationStatus.Unauthorized, "You're already signed out!");
+                return Error.Unauthorized(code: ErrorCodes.Authentication.AlreadySignedOut, description: "You're already signed out!");
 
             int domainUserId = _currentUserService.UserId!.Value;
             var appUser = await _userManager.Users.FirstOrDefaultAsync(au => au.DomainUserId == domainUserId, cancellationToken: ct);
             if (appUser is null)
             {
                 _logger.LogWarning("Logout failed - User not found for ID: {UserId}", domainUserId);
-                return ServiceOperationResult.Failure(ServiceOperationStatus.NotFound, "User not found!");
+                return Error.NotFound(code: ErrorCodes.User.UserNotFound, description: "User not found!");
             }
 
             var refreshTokenFromDb = await _unitOfWork.RefreshTokens.GetAsync(r => r.Token == refreshToken && r.UserId == appUser.Id, ct);
@@ -150,29 +146,29 @@ namespace Template.Infrastructure.Services
             if (refreshTokenFromDb is null || !refreshTokenFromDb.IsActive)
             {
                 _logger.LogWarning("Logout failed - Invalid refresh token for user: {Email}", appUser.Email);
-                return ServiceOperationResult.Failure(ServiceOperationStatus.NotFound, "You maybe signed out!");
+                return Error.Unauthorized(code: ErrorCodes.Authentication.InvalidRefreshToken, description: "You maybe signed out!");
             }
 
             refreshTokenFromDb.Revoke();
             await _unitOfWork.RefreshTokens.UpdateAsync(refreshTokenFromDb, ct);
             _logger.LogInformation("Successful logout for user: {Email}", appUser.Email);
-            return ServiceOperationResult.Success(message: "Logout successfull");
+            return Result.Success;
 
         }
 
 
-        public async Task<ServiceOperationResult> ChangePassword(int domainUserId, string currentPassword, string newPassword)
+        public async Task<ErrorOr<Success>> ChangePassword(int domainUserId, string currentPassword, string newPassword)
         {
             var appUser = await _userManager.Users.FirstOrDefaultAsync(au => au.DomainUserId == domainUserId);
             if (appUser is null)
-                return ServiceOperationResult.Failure(ServiceOperationStatus.NotFound, "User not found.");
+                return Error.NotFound(code: ErrorCodes.User.UserNotFound, description: "User not found.");
 
             var result = await _userManager.ChangePasswordAsync(appUser, currentPassword, newPassword);
 
             if (!result.Succeeded)
-                return ServiceOperationResult.Failure(ServiceOperationStatus.Unauthorized, result.Errors.FirstOrDefault()?.Description);
+                return Error.Unauthorized(code: ErrorCodes.Authentication.PasswordChangeFailed, description: result.Errors.FirstOrDefault()?.Description ?? "Password change failed");
 
-            return ServiceOperationResult.Success(ServiceOperationStatus.Updated);
+            return Result.Success;
 
         }
 
@@ -180,10 +176,10 @@ namespace Template.Infrastructure.Services
 
         #region Helper functions
 
-        private async Task<ServiceOperationResult<AuthResult>> AuthenticateAsync(ApplicationUser appUser, DateTime? refreshTokenExpDate = null)
+        private async Task<ErrorOr<AuthResult>> AuthenticateAsync(ApplicationUser appUser, DateTime? refreshTokenExpDate = null)
         {
             if (appUser is null || appUser.DomainUserId is null || appUser.DomainUser is null)
-                return ServiceOperationResult<AuthResult>.Failure(ServiceOperationStatus.InvalidParameters, "User cannot be null");
+                return Error.Validation(description: "User cannot be null");
 
 
             var userClaims = await GetUserClaims(appUser);
@@ -192,7 +188,6 @@ namespace Template.Infrastructure.Services
             var refreshToken = GenerateRefreshToken(appUser.Id, jwtSecurityToken.Id, refreshTokenExpDate);
             await _unitOfWork.RefreshTokens.AddAsync(refreshToken);
 
-            //prepare response
             string accessToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
 
             RefreshTokenDTO refreshTokenDto = new()
@@ -206,7 +201,7 @@ namespace Template.Infrastructure.Services
             AuthResult jwtResult = new(accessToken, refreshTokenDto, userResponse);
 
 
-            return ServiceOperationResult<AuthResult>.Success(jwtResult, message: "Logged in successfully");
+            return jwtResult;
         }
 
         private JwtSecurityToken GenerateAccessToken(List<Claim> userClaims)

@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Template.Domain.Common.Enums;
 using Template.Domain.Contracts.Repositories;
 using Template.Domain.Entities;
-using Template.Domain.Enums;
-using Template.Infrastructure.Data.IdentityEntities;
+using Template.Infrastructure.Data.Identity.Entities;
 
 namespace Template.Infrastructure.Data.Seeding
 {

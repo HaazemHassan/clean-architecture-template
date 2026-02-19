@@ -1,10 +1,10 @@
-﻿using MediatR;
-using Template.Application.Common.Responses;
+﻿using ErrorOr;
+using MediatR;
 
 namespace Template.Application.Features.Users.Commands.ChangePassword
 {
 
-    public class ChangePasswordCommand : IRequest<Result>
+    public class ChangePasswordCommand : IRequest<ErrorOr<Success>>
     {
         public string CurrentPassword { get; set; } = string.Empty;
         public string NewPassword { get; set; } = string.Empty;

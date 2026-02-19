@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Template.Domain.Enums;
+using Template.Domain.Common.Enums;
 
 namespace Template.API.Controllers.Admin
 {

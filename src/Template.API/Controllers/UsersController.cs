@@ -1,14 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Template.API.Constants;
-using Template.API.Filters;
-using Template.API.Requests;
+using Template.API.Common.Constants;
+using Template.API.Common.Filters;
+using Template.API.Requests.Client.Users;
 using Template.Application.Common.Pagination;
-using Template.Application.Common.Responses;
-using Template.Application.Contracts.Services.Api;
-using Template.Application.Features.Authentication.Common;
-using Template.Application.Features.Users.Commands.ChangePassword;
+using Template.Application.Contracts.Api;
 using Template.Application.Features.Users.Commands.Register;
 using Template.Application.Features.Users.Commands.UpdateProfile;
 using Template.Application.Features.Users.Queries.CheckEmailAvailability;
@@ -36,7 +33,7 @@ namespace Template.API.Controllers
         /// <response code="403">User is already authenticated (anonymous only endpoint)</response>
         [HttpPost()]
         [AnonymousOnly]
-        [ProducesResponseType(typeof(Result<AuthResult>), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -44,15 +41,15 @@ namespace Template.API.Controllers
         {
             var result = await Mediator.Send(command);
 
-            if (result.Succeeded)
-            {
-                return CreatedAtRoute(
-                            routeName: RouteNames.Users.GetUserById,
-                            routeValues: result.Data!.Id,
-                            value: result);
-            }
+            if (result.IsError)
+                return Problem(result.Errors);
 
-            return NewResult(result);
+            return CreatedAtRoute(
+                            routeName: RouteNames.Users.GetUserById,
+                            routeValues: new { id = result.Value!.Id },
+                            value: result.Value
+             );
+
 
         }
 
@@ -83,14 +80,16 @@ namespace Template.API.Controllers
         /// <response code="404">User not found</response>
         /// <response code="400">Invalid user ID format</response>
         [HttpGet("{Id:int}", Name = RouteNames.Users.GetUserById)]
-        [Authorize]
-        [ProducesResponseType(typeof(Result<GetUserByIdQueryResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetUserByIdQueryResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetById([FromRoute] GetUserByIdQuery query)
+        public async Task<IActionResult> GetById([FromRoute] int Id)
         {
+            var query = new GetUserByIdQuery(Id);
             var result = await Mediator.Send(query);
-            return NewResult(result);
+            if (result.IsError)
+                return Problem(result.Errors);
+            return Ok(result.Value);
         }
 
 
@@ -104,12 +103,14 @@ namespace Template.API.Controllers
         /// <response code="200">Returns true if email is available, false otherwise</response>
         /// <response code="400">Invalid email format</response>
         [HttpGet("check-email")]
-        [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(CheckEmailAvailabilityQueryResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CheckEmailAvailability([FromQuery] CheckEmailAvailabilityQuery query)
         {
             var result = await Mediator.Send(query);
-            return NewResult(result);
+            if (result.IsError)
+                return Problem(result.Errors);
+            return Ok(result.Value);
         }
 
 
@@ -118,7 +119,7 @@ namespace Template.API.Controllers
         /// <summary>
         /// Update the authenticated user's profile information
         /// </summary>
-        /// <param name="command">Updated profile data including address and phone number</param>
+        /// <param name="request">Updated profile data including address and phone number</param>
         /// <returns>Success response if profile is updated</returns>
         /// <response code="200">Profile updated successfully</response>
         /// <response code="400">Invalid input data</response>
@@ -126,7 +127,7 @@ namespace Template.API.Controllers
         /// <response code="404">User not found</response>
         [HttpPatch("me")]
         [Authorize]
-        [ProducesResponseType(typeof(Result<UpdateProfileCommandResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UpdateProfileCommandResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -135,18 +136,22 @@ namespace Template.API.Controllers
             var command = _mapper.Map<UpdateProfileCommand>(request);
             command.OwnerUserId = _currentUserService.UserId!.Value;
             var result = await Mediator.Send(command);
-            return NewResult(result);
+            if (result.IsError)
+                return Problem(result.Errors);
+            return Ok(result.Value);
         }
 
 
 
-        [HttpPatch("password")]
-        [Authorize]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
-        {
-            var result = await Mediator.Send(command);
-            return NewResult(result);
-        }
+        //[HttpPatch("password")]
+        //[Authorize]
+        //public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
+        //{
+        //    var result = await Mediator.Send(command);
+        //    if (result.IsError)
+        //        return Problem(result.Errors);
+        //    return NoContent();
+        //}
 
     }
 }

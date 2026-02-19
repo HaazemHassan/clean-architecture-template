@@ -1,12 +1,13 @@
-﻿using MediatR;
-using Template.Application.Common.Responses;
-using Template.Application.Common.Security;
-using Template.Application.Contracts.Requests;
+﻿using ErrorOr;
+using MediatR;
+using Template.Application.Security;
+using Template.Application.Security.Markers;
+using Template.Application.Security.Policies;
 
 namespace Template.Application.Features.Users.Commands.UpdateProfile
 {
     [Authorize(Policy = AuthorizationPolicies.SelfOrAdmin)]
-    public class UpdateProfileCommand : IRequest<Result<UpdateProfileCommandResponse>>, IOwnedResourceRequest
+    public class UpdateProfileCommand : IRequest<ErrorOr<UpdateProfileCommandResponse>>, IOwnedResourceRequest
     {
         public int OwnerUserId { get; set; }  // Used for authorization policy
         public string? FirstName { get; set; }

@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Template.API.Filters;
-using Template.Application.Common.Responses;
-using Template.Application.Contracts.Services.Api;
-using Template.Application.Features.Authentication.Commands.Logout;
+using Template.API.Common.Filters;
+using Template.Application.Contracts.Api;
 using Template.Application.Features.Authentication.Commands.RefreshToken;
 using Template.Application.Features.Authentication.Commands.SignIn;
 using Template.Application.Features.Authentication.Common;
@@ -37,15 +34,18 @@ namespace Template.API.Controllers
         [HttpPost("login")]
         [AnonymousOnly]
         [EnableRateLimiting("loginLimiter")]
-        [ProducesResponseType(typeof(Result<AuthResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AuthResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> Login([FromBody] SignInCommand command)
         {
             var result = await Mediator.Send(command);
-            HandleRefreshToken(result);
-            return NewResult(result);
+            if (result.IsError)
+                return Problem(result.Errors);
+
+            HandleRefreshToken(result.Value);
+            return Ok(result.Value);
         }
 
 
@@ -64,7 +64,7 @@ namespace Template.API.Controllers
         /// The access token in the request body can be expired, but must be valid in format.
         /// </remarks>
         [HttpPost("refresh-token")]
-        [ProducesResponseType(typeof(Result<AuthResult>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AuthResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
@@ -77,36 +77,39 @@ namespace Template.API.Controllers
 
             var result = await Mediator.Send(command);
 
-            HandleRefreshToken(result);
+            if (result.IsError)
+                return Problem(result.Errors);
 
-            return NewResult(result);
+            HandleRefreshToken(result.Value);
+            return Ok(result.Value);
         }
 
 
-        [HttpPost("logout")]
-        [Authorize]
-        public async Task<IActionResult> Logout([FromBody] LogoutCommand command)
-        {
-            if (_clientContextService.IsWebClient())
-                command.RefreshToken = Request.Cookies["refreshToken"];
+        //[HttpPost("logout")]
+        //[Authorize]
+        //public async Task<IActionResult> Logout([FromBody] LogoutCommand command)
+        //{
+        //    if (_clientContextService.IsWebClient())
+        //        command.RefreshToken = Request.Cookies["refreshToken"];
 
-            if (command.RefreshToken is null)
-                return Unauthorized("Refresh token is required");
+        //    if (command.RefreshToken is null)
+        //        return Unauthorized("Refresh token is required");
 
-            var result = await Mediator.Send(command);
-            Response.Cookies.Delete("refreshToken");
+        //    var result = await Mediator.Send(command);
+        //    if (result.IsError)
+        //        return Problem(result.Errors);
 
-
-            return NewResult(result);
-        }
+        //    Response.Cookies.Delete("refreshToken");
+        //    return NoContent();
+        //}
 
         //helpers
-        private void HandleRefreshToken(Result<AuthResult> result)
+        private void HandleRefreshToken(AuthResult authResult)
         {
-            if (!result.Succeeded || result.Data?.RefreshToken is null)
+            if (authResult?.RefreshToken is null)
                 return;
 
-            var refreshToken = result.Data.RefreshToken.Token;
+            var refreshToken = authResult.RefreshToken.Token;
 
             if (_clientContextService.IsWebClient())
             {
@@ -116,14 +119,16 @@ namespace Template.API.Controllers
                     Secure = true,
                     SameSite = SameSiteMode.None,
                     Path = "/api/authentication",
-                    Expires = result.Data.RefreshToken.ExpirationDate
+                    Expires = authResult.RefreshToken.ExpirationDate
                 };
                 Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
-                result.Data.RefreshToken = null;
+                authResult.RefreshToken = null;
             }
         }
     }
 
 }
+
+
 
 

@@ -1,22 +1,22 @@
+using ErrorOr;
 using MediatR;
-using Template.Application.Common.Responses;
 using Template.Domain.Contracts.Repositories;
 
-namespace Template.Application.Features.Users.Queries.CheckEmailAvailability {
-    public class CheckEmailAvailabilityQueryHandler : ResultHandler, IRequestHandler<CheckEmailAvailabilityQuery, Result<CheckEmailAvailabilityQueryResponse>> {
-        private readonly IUnitOfWork _unitOfWork;
+namespace Template.Application.Features.Users.Queries.CheckEmailAvailability
+{
+    public class CheckEmailAvailabilityQueryHandler(IUnitOfWork _unitOfWork)
+        : IRequestHandler<CheckEmailAvailabilityQuery, ErrorOr<CheckEmailAvailabilityQueryResponse>>
+    {
 
-        public CheckEmailAvailabilityQueryHandler(IUnitOfWork unitOfWork) {
-            _unitOfWork = unitOfWork;
-        }
-
-        public async Task<Result<CheckEmailAvailabilityQueryResponse>> Handle(CheckEmailAvailabilityQuery request, CancellationToken cancellationToken) {
-            var user = await _unitOfWork.Users.GetAsync(u => u.Email == request.Email, cancellationToken);
-            var response = new CheckEmailAvailabilityQueryResponse {
-                IsAvailable = user is null
+        public async Task<ErrorOr<CheckEmailAvailabilityQueryResponse>> Handle(CheckEmailAvailabilityQuery request, CancellationToken cancellationToken)
+        {
+            var emailExists = await _unitOfWork.Users.AnyAsync(u => u.Email == request.Email, cancellationToken);
+            var response = new CheckEmailAvailabilityQueryResponse
+            {
+                IsAvailable = !emailExists
             };
 
-            return Success(response, message: response.IsAvailable ? "Email is available." : "Email is not available.");
+            return response;
         }
     }
 }

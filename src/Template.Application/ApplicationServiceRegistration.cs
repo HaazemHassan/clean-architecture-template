@@ -3,6 +3,9 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using Template.Application.Common.Behaviors;
+using Template.Application.Common.Behaviors.Transaction;
+using Template.Application.Common.Behaviors.Trimming;
+using Template.Application.Security.Policies;
 
 namespace Template.Application
 {
@@ -16,6 +19,7 @@ namespace Template.Application
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
             AddBehaviours(services);
+            AddAuthorizationPolicies(services);
             AddDomainServices(services);
 
             return services;
@@ -23,7 +27,7 @@ namespace Template.Application
 
 
 
-        public static void AddBehaviours(IServiceCollection services)
+        private static void AddBehaviours(IServiceCollection services)
         {
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TrimmingBehavior<,>));
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
@@ -32,7 +36,17 @@ namespace Template.Application
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
         }
 
-        public static void AddDomainServices(IServiceCollection services)
+
+        private static void AddAuthorizationPolicies(IServiceCollection services)
+        {
+            services.AddScoped<IAuthorizationPolicy, SelfOrAdminPolicy>();
+            services.AddScoped<IAuthorizationPolicy, SelfOnlyPolicy>();
+
+        }
+
+
+
+        private static void AddDomainServices(IServiceCollection services)
         {
         }
     }
