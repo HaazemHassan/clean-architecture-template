@@ -31,7 +31,11 @@ namespace Template.Infrastructure.Services
         }
 
         public string Normalize(string phoneNumber)
+
         {
+            if (phoneNumber is null)
+                throw new ValidationException("Phone number cannot be null", [new ValidationFailure()]);
+
             var parsed = _util.Parse(phoneNumber, DefaultRegion);
 
             if (!_util.IsValidNumber(parsed))

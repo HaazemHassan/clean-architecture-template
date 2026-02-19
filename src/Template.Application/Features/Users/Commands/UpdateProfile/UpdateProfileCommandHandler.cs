@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using ErrorOr;
 using MediatR;
-using Template.Application.Contracts.Api;
+using Template.Application.ServicesContracts.Infrastructure;
 using Template.Domain.Common.Constants;
 using Template.Domain.Contracts.Repositories;
 using Template.Domain.Entities;
@@ -12,26 +12,30 @@ namespace Template.Application.Features.Users.Commands.UpdateProfile
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly ICurrentUserService _currentUserService;
+        private readonly IPhoneNumberService _phoneNumberService;
 
-        public UpdateProfileCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
+        public UpdateProfileCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IPhoneNumberService phoneNumberService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _currentUserService = currentUserService;
+            _phoneNumberService = phoneNumberService;
         }
 
         public async Task<ErrorOr<UpdateProfileCommandResponse>> Handle(UpdateProfileCommand request, CancellationToken cancellationToken)
         {
+            string normalizedPhoneNumber;
 
             var userFromDb = await _unitOfWork.Users.GetByIdAsync(request.OwnerUserId, cancellationToken);
             if (userFromDb is null)
                 return Error.NotFound(description: "User not found");
 
+
             if (request.PhoneNumber is not null)
             {
+                normalizedPhoneNumber = _phoneNumberService.Normalize(request.PhoneNumber);
+
                 var isPhoneExists = await _unitOfWork.Users.AnyAsync(u =>
-                            u.PhoneNumber == request.PhoneNumber
+                            u.PhoneNumber == normalizedPhoneNumber
                            && u.Id != userFromDb.Id, cancellationToken);
 
                 if (isPhoneExists)

@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Template.Application.Contracts.Infrastructure;
+using Template.Application.ServicesContracts.Infrastructure;
 using Template.Domain.Common.Enums;
 using Template.Domain.Contracts.Repositories;
 using Template.Domain.Entities;
@@ -13,17 +15,23 @@ namespace Template.Infrastructure.Data.Seeding
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly AppDbContext _context;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IApplicationUserService _applicationUserService;
+        private readonly IPhoneNumberService _phoneNumberService;
 
         public SeederService(
             UserManager<ApplicationUser> userManager,
             RoleManager<ApplicationRole> roleManager,
             IUnitOfWork unitOfWork,
-            AppDbContext context)
+            AppDbContext context,
+            IApplicationUserService applicationUserService,
+            IPhoneNumberService phoneNumberService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _unitOfWork = unitOfWork;
             _context = context;
+            _applicationUserService = applicationUserService;
+            _phoneNumberService = phoneNumberService;
         }
 
         public async Task SeedRolesAsync(List<RoleSeedDto> rolesSeedData, CancellationToken cancellationToken = default)
@@ -78,7 +86,6 @@ namespace Template.Infrastructure.Data.Seeding
             }
 
 
-
             var existingPermissions = await _context.Set<RolePermission>()
                 .Where(rp => rp.RoleId == roleId)
                 .Select(rp => rp.Permission)
@@ -106,9 +113,7 @@ namespace Template.Infrastructure.Data.Seeding
                 _context.Set<RolePermission>().RemoveRange(permissionsToRemove);
         }
 
-        public async Task SeedUsersAsync(
-            List<UserSeedDto> usersSeedData,
-            CancellationToken cancellationToken = default)
+        public async Task SeedUsersAsync(List<UserSeedDto> usersSeedData, CancellationToken cancellationToken = default)
         {
             if (usersSeedData is null || usersSeedData.Count == 0)
                 return;
@@ -116,52 +121,49 @@ namespace Template.Infrastructure.Data.Seeding
             await using var transaction =
                 await _unitOfWork.BeginTransactionAsync(cancellationToken);
 
-            foreach (var userData in usersSeedData)
+            try
             {
-                if (string.IsNullOrWhiteSpace(userData.Email) ||
-                    string.IsNullOrWhiteSpace(userData.Password) ||
-                    string.IsNullOrWhiteSpace(userData.Role))
-                    continue;
+                foreach (var userData in usersSeedData)
+                {
+                    var existingUser = await _userManager.FindByEmailAsync(userData.Email);
+                    if (existingUser is not null)
+                        continue;
 
-                var existingUser =
-                    await _userManager.FindByEmailAsync(userData.Email);
+                    var normalizedPhone =
+                        _phoneNumberService.Normalize(userData.PhoneNumber);
 
-                if (existingUser is not null)
-                    continue;
+                    var domainUser = new DomainUser(
+                        userData.FirstName,
+                        userData.LastName,
+                        userData.Email,
+                        normalizedPhone,
+                        userData.Address
+                    );
 
-                if (!await _roleManager.RoleExistsAsync(userData.Role))
-                    continue;
+                    var result = await _applicationUserService
+                        .AddUser(domainUser, userData.Password);
 
-                var domainUser = new DomainUser(
-                    userData.FirstName,
-                    userData.LastName,
-                    userData.Email,
-                    userData.PhoneNumber,
-                    userData.Address);
+                    if (result.IsError)
+                        throw new Exception(
+                            $"Failed to create user {userData.Email}: {result.FirstError.Description}");
 
-                var applicationUser = new ApplicationUser(
-                    userData.Email,
-                    userData.PhoneNumber);
+                    var createdUser = await _userManager.FindByEmailAsync(userData.Email);
 
-                applicationUser.AssignDomainUser(domainUser);
-                applicationUser.ConfirmEmail();
+                    if (createdUser is not null)
+                    {
+                        createdUser.EmailConfirmed = true;
+                        await _userManager.UpdateAsync(createdUser);
+                    }
+                }
 
-                var createResult = await _userManager.CreateAsync(
-                    applicationUser,
-                    userData.Password);
-
-                if (!createResult.Succeeded)
-                    continue;
-
-                var roleResult = await _userManager
-                    .AddToRoleAsync(applicationUser, userData.Role);
-
-                if (!roleResult.Succeeded)
-                    continue;
+                await transaction.CommitAsync(cancellationToken);
             }
-
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+            }
         }
+
+
     }
 }
