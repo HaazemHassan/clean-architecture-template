@@ -54,7 +54,6 @@ namespace Template.API.Controllers
         }
 
 
-
         /// <summary>
         /// Get all users with pagination
         /// </summary>

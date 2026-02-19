@@ -1,17 +1,10 @@
 [
   {
-    "Name": "SuperAdmin",
+    "Name": "Admin",
     "Permissions": [
       "UsersRead",
       "UsersWrite",
       "UsersDelete"
-    ]
-  },
-  {
-    "Name": "Admin",
-    "Permissions": [
-      "UsersRead",
-      "UsersWrite"
     ]
   }, 
   {

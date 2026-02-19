@@ -41,8 +41,8 @@ namespace Template.API.Extentions
                 {
                     var seederService = scope.ServiceProvider.GetRequiredService<ISeederService>();
 
-                    string rolesJson = await File.ReadAllTextAsync("DataSeeding/Roles.json");
-                    string usersJson = await File.ReadAllTextAsync("DataSeeding/Users.json");
+                    string rolesJson = await File.ReadAllTextAsync("DataSeedingJson/Roles.json");
+                    string usersJson = await File.ReadAllTextAsync("DataSeedingJson/Users.json");
 
                     List<RoleSeedDto>? rolesSeedData = JsonSerializer.Deserialize<List<RoleSeedDto>>(rolesJson);
                     List<UserSeedDto>? usersSeedData = JsonSerializer.Deserialize<List<UserSeedDto>>(usersJson);
