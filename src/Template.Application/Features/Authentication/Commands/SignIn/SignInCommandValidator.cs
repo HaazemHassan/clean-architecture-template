@@ -5,11 +5,11 @@ using Template.Application.ValidationRules.Common;
 
 namespace Template.Application.Features.Authentication.Commands.SignIn {
     public class SignInCommandValidator : AbstractValidator<SignInCommand> {
-        public SignInCommandValidator(PasswordSettings passwordSettings) {
+        public SignInCommandValidator(PasswordOptions passwordSettings) {
             ApplyValidationRules(passwordSettings);
         }
 
-        private void ApplyValidationRules(PasswordSettings passwordSettings) {
+        private void ApplyValidationRules(PasswordOptions passwordSettings) {
             RuleFor(x => x.Email).Required();
             RuleFor(x => x.Password).Required();
 

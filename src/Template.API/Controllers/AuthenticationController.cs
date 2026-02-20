@@ -13,9 +13,9 @@ namespace Template.API.Controllers
     /// <summary>
     /// Authentication controller for handling user login and token management
     /// </summary>
-    public class AuthenticationController(JwtSettings jwtSettings, IClientContextService clientContextService) : BaseController
+    public class AuthenticationController(JwtOptions jwtSettings, IClientContextService clientContextService) : BaseController
     {
-        private readonly JwtSettings _jwtSettings = jwtSettings;
+        private readonly JwtOptions _jwtSettings = jwtSettings;
         private readonly IClientContextService _clientContextService = clientContextService;
 
         /// <summary>

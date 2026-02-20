@@ -9,8 +9,8 @@ namespace Template.Application.Features.Users.Commands.AddUser
     public class AddUserCommandValidator : AbstractValidator<AddUserCommand>
     {
         private readonly IPhoneNumberService _phoneNumberService;
-        private readonly PasswordSettings _passwordSettings;
-        public AddUserCommandValidator(PasswordSettings passwordSettings, IPhoneNumberService phoneNumberService)
+        private readonly PasswordOptions _passwordSettings;
+        public AddUserCommandValidator(PasswordOptions passwordSettings, IPhoneNumberService phoneNumberService)
         {
             _passwordSettings = passwordSettings;
             _phoneNumberService = phoneNumberService;

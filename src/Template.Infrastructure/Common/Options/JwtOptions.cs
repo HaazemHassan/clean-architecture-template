@@ -1,5 +1,7 @@
-﻿namespace Template.Infrastructure.Common.Options {
-    public class JwtSettings {
+﻿namespace Template.Infrastructure.Common.Options
+{
+    public class JwtOptions
+    {
         public const string SectionName = "JwtSettings";
 
         public string Secret { get; set; } = string.Empty;

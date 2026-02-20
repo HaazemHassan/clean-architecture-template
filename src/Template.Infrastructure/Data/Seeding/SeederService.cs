@@ -163,7 +163,5 @@ namespace Template.Infrastructure.Data.Seeding
                 await transaction.RollbackAsync(cancellationToken);
             }
         }
-
-
     }
 }

@@ -9,8 +9,8 @@ namespace Template.Application.Features.Users.Commands.Register
     public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
     {
         private readonly IPhoneNumberService _phoneNumberService;
-        private readonly PasswordSettings _passwordSettings;
-        public RegisterCommandValidator(PasswordSettings passwordSettings, IPhoneNumberService phoneNumberService)
+        private readonly PasswordOptions _passwordSettings;
+        public RegisterCommandValidator(PasswordOptions passwordSettings, IPhoneNumberService phoneNumberService)
         {
             _passwordSettings = passwordSettings;
             _phoneNumberService = phoneNumberService;

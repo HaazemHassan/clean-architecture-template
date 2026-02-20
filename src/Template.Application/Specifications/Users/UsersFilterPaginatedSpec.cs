@@ -1,6 +1,5 @@
 ﻿using Ardalis.Specification;
 using Template.Domain.Entities;
-using Template.Domain.Specifications;
 
 namespace Template.Application.Specifications.Users
 {

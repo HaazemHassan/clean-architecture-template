@@ -5,11 +5,11 @@ using Template.Application.ValidationRules.Common;
 
 namespace Template.Application.Features.Users.Commands.ChangePassword {
     public class ChangePasswordCommandValidator : AbstractValidator<ChangePasswordCommand> {
-        public ChangePasswordCommandValidator(PasswordSettings passwordSettings) {
+        public ChangePasswordCommandValidator(PasswordOptions passwordSettings) {
             ApplyValidationRules(passwordSettings);
         }
 
-        private void ApplyValidationRules(PasswordSettings passwordSettings) {
+        private void ApplyValidationRules(PasswordOptions passwordSettings) {
             RuleFor(x => x.CurrentPassword).Required();
             RuleFor(x => x.NewPassword).Required();
             RuleFor(x => x.ConfirmNewPassword).Required();

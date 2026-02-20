@@ -105,8 +105,8 @@ namespace Template.API
         private static IServiceCollection AddAuthenticationConfigurations(IServiceCollection services, IConfiguration configuration)
         {
             //JWT Authentication
-            var jwtSettings = new JwtSettings();
-            configuration.GetSection(JwtSettings.SectionName).Bind(jwtSettings);
+            var jwtSettings = new JwtOptions();
+            configuration.GetSection(JwtOptions.SectionName).Bind(jwtSettings);
             services.AddSingleton(jwtSettings);
 
 

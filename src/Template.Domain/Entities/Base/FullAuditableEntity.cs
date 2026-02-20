@@ -1,4 +1,4 @@
-﻿using Template.Domain.Common.Auditing;
+﻿using Template.Domain.Entities.Contracts;
 
 namespace Template.Domain.Entities.Base
 {

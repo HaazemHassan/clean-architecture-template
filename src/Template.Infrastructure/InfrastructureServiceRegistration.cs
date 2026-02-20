@@ -49,8 +49,8 @@ public static class InfrastructureServiceRegistration
     private static IServiceCollection AddIdentityConfigurations(IServiceCollection services, IConfiguration configuration)
     {
 
-        var passwordSettings = new PasswordSettings();
-        configuration.GetSection(PasswordSettings.SectionName).Bind(passwordSettings);
+        var passwordSettings = new Application.Common.Options.PasswordOptions();
+        configuration.GetSection(PasswordOptions.SectionName).Bind(passwordSettings);
         services.AddSingleton(passwordSettings);
 
         services.AddIdentity<ApplicationUser, ApplicationRole>(option =>

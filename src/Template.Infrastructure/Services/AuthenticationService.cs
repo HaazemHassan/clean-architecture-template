@@ -15,17 +15,17 @@ using Template.Application.Features.Users.Common;
 using Template.Domain.Common.Constants;
 using Template.Domain.Contracts.Repositories;
 using Template.Domain.Entities;
+using Template.Domain.Specifications.RefreshTokens;
 using Template.Infrastructure.Common.Options;
 using Template.Infrastructure.Data;
 using Template.Infrastructure.Data.Identity.Entities;
-using Template.Infrastructure.Specifications.RefreshTokens;
 
 namespace Template.Infrastructure.Services
 {
     internal class AuthenticationService : IAuthenticationService
     {
 
-        private readonly JwtSettings _jwtSettings;
+        private readonly JwtOptions _jwtSettings;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IUnitOfWork _unitOfWork;
@@ -38,7 +38,7 @@ namespace Template.Infrastructure.Services
 
 
 
-        public AuthenticationService(JwtSettings jwtSettings, UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork, IApplicationUserService applicationUserService, IMapper mapper /*IEmailService emailService*/, RoleManager<ApplicationRole> roleManager, ICurrentUserService currentUserService, AppDbContext dbContext, ILogger<AuthenticationService> logger)
+        public AuthenticationService(JwtOptions jwtSettings, UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork, IApplicationUserService applicationUserService, IMapper mapper /*IEmailService emailService*/, RoleManager<ApplicationRole> roleManager, ICurrentUserService currentUserService, AppDbContext dbContext, ILogger<AuthenticationService> logger)
         {
             _jwtSettings = jwtSettings;
             _userManager = userManager;

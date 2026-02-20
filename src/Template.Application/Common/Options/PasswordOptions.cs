@@ -1,6 +1,8 @@
-namespace Template.Application.Common.Options {
+namespace Template.Application.Common.Options
+{
 
-    public class PasswordSettings {
+    public class PasswordOptions
+    {
         public const string SectionName = "PasswordSettings";
 
 

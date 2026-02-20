@@ -1,6 +1,6 @@
 ﻿using Ardalis.Specification;
 
-namespace Template.Domain.Specifications
+namespace Template.Application.Specifications
 {
     public static class SpecificationBuilderExtensions
     {

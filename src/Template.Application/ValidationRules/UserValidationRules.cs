@@ -40,7 +40,7 @@ namespace Template.Application.ValidationRules
 
         public static IRuleBuilderOptions<T, string?> ApplyPasswordRules<T>(
              this IRuleBuilder<T, string> ruleBuilder,
-             PasswordSettings settings
+             PasswordOptions settings
         )
         {
             var rule = (IRuleBuilderOptions<T, string>)ruleBuilder;
